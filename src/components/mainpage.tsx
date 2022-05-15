@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {HashRouter, Routes, Route, Link} from 'react-router-dom';
-import P2P from './pages/p2p';
 import Home from './pages/home';
 import CryptoOverview from './pages/crypto/cryptooverview';
 import InfoOverview from './pages/info';
@@ -67,36 +66,6 @@ export class MainPage extends Component<{}, MainPageState> {
                     <Link
                       className={
                         'flex items-center px-4 py-2 mt-5 text-gray-600 ' +
-                        this.getSelectedBg('P2P') +
-                        ' rounded-md hover:bg-gray-200'
-                      }
-                      onClick={() => {
-                        this.setSelected('P2P');
-                      }}
-                      to="/p2p"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                      </svg>
-
-                      <span className="mx-4 font-medium">P2P</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      className={
-                        'flex items-center px-4 py-2 mt-5 text-gray-600 ' +
                         this.getSelectedBg('CRYPTOS') +
                         ' rounded-md hover:bg-gray-200'
                       }
@@ -121,36 +90,6 @@ export class MainPage extends Component<{}, MainPageState> {
                       </svg>
 
                       <span className="mx-4 font-medium">Cryptos</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      className={
-                        'flex items-center px-4 py-2 mt-5 text-gray-600 ' +
-                        this.getSelectedBg('FORECAST') +
-                        ' rounded-md hover:bg-gray-200'
-                      }
-                      onClick={() => {
-                        this.setSelected('FORECAST');
-                      }}
-                      to="/forecast"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"
-                        />
-                      </svg>
-
-                      <span className="mx-4 font-medium">Forecast</span>
                     </Link>
                   </li>
                   <li>
@@ -226,7 +165,6 @@ export class MainPage extends Component<{}, MainPageState> {
           <div className="w-full max-h-full overflow-y-auto">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/p2p" element={<P2P />} />
               <Route path="/cryptos" element={<CryptoOverview />} />
               <Route path="/info" element={<InfoOverview />} />
             </Routes>

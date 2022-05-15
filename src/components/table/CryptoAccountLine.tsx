@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {CryptoAccount} from '../models/cryptoaccount';
+import {getIconByAccountType} from '../../utils/utils';
 
 type CryptoAccountLineProps = {
   account: CryptoAccount;
@@ -17,8 +18,9 @@ export class CryptoAccountLine extends Component<CryptoAccountLineProps, {}> {
           </div>
         </td>
         <td className="py-3 px-6 text-left">
-          <div className="grid grid-cols-1">
-            <span>{this.props.account.type.name}</span>
+          <div className="flex">
+            <div>{getIconByAccountType(this.props.account.type)}</div>
+            <div className="pl-2">{this.props.account.type.name}</div>
           </div>
         </td>
         <td className="py-3 px-6 text-left">
