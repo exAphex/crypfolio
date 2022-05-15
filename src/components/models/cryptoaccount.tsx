@@ -10,9 +10,14 @@ const accountTypes: CryptoAccountType[] = [
   {id: 'KRAKEN', name: 'Kraken'},
 ];
 
+export type CryptoAccountDTO = {
+  id: string;
+  name: string;
+};
+
 export class CryptoAccount extends Account {
-  private type: CryptoAccountType;
-  private address: string;
+  type: CryptoAccountType;
+  address: string;
 
   constructor(
     id: string,
@@ -23,22 +28,6 @@ export class CryptoAccount extends Account {
   ) {
     super(id, name, description);
     this.type = type;
-    this.address = address;
-  }
-
-  getType(): CryptoAccountType {
-    return this.type;
-  }
-
-  setType(type: CryptoAccountType): void {
-    this.type = type;
-  }
-
-  getAddress(): string {
-    return this.address;
-  }
-
-  setAddress(address: string) {
     this.address = address;
   }
 }

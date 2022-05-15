@@ -5,26 +5,18 @@ const url = require('url');
 const {ipcMain} = require('electron');
 const store = require('electron-json-storage');
 const fetch = require('node-fetch');
-const accountHandler = require('./js/handlers/accounthandler.js');
+const CryptoAccountHandler = require('./js/handlers/CryptoAccountHandler.js');
 
-ipcMain.on('query-account', (event, arg) => {
-  accountHandler.queryAccounts(event, arg);
+ipcMain.on('list_crypto_accounts', (event, arg) => {
+  CryptoAccountHandler.listAccounts(event);
 });
 
-ipcMain.on('add-account', (event, arg) => {
-  accountHandler.addAccount(event, arg);
+ipcMain.on('add_crypto_account', (event, arg) => {
+  CryptoAccountHandler.addAccount(event, arg);
 });
 
-ipcMain.on('list-accounts', (event, arg) => {
-  accountHandler.listAccounts(event, arg);
-});
-
-ipcMain.on('delete-account', (event, arg) => {
-  accountHandler.deleteAccount(event, arg);
-});
-
-ipcMain.on('update-account', (event, arg) => {
-  accountHandler.updateAccount(event, arg);
+ipcMain.on('delete_crypto_account', (event, arg) => {
+  CryptoAccountHandler.deleteAccount(event, arg);
 });
 
 ipcMain.on('get-version', (event, arg) => {
@@ -49,11 +41,17 @@ async function checkForUpdate(event) {
   const response = await fetch(api, {method: 'GET'});
   const json = await response.json();
   if (json && json.length > 0) {
-    json.sort(function(l, u) {
+    json.sort(function (l, u) {
       return new Date(l.published_at) < new Date(u.published_at) ? 1 : -1;
     });
     if (json[0].name != app.getVersion()) {
-      const notification = new Notification({title: 'New Version available', body: 'A new release was found: ' + json[0].name + '. Click to download update!'});
+      const notification = new Notification({
+        title: 'New Version available',
+        body:
+          'A new release was found: ' +
+          json[0].name +
+          '. Click to download update!',
+      });
       notification.show();
 
       notification.on('click', (event, arg) => {
@@ -75,13 +73,13 @@ function createWindow() {
     },
   });
 
-  const appURL = app.isPackaged ?
-    url.format({
-      pathname: path.join(__dirname, 'index.html'),
-      protocol: 'file:',
-      slashes: true,
-    }) :
-    'http://localhost:3000';
+  const appURL = app.isPackaged
+    ? url.format({
+        pathname: path.join(__dirname, 'index.html'),
+        protocol: 'file:',
+        slashes: true,
+      })
+    : 'http://localhost:3000';
   mainWindow.loadURL(appURL);
 
   if (!app.isPackaged) {
@@ -91,14 +89,14 @@ function createWindow() {
 
 function setupLocalFilesNormalizerProxy() {
   protocol.registerHttpProtocol(
-      'file',
-      (request, callback) => {
-        const url = request.url.substr(8);
-        callback({path: path.normalize(`${__dirname}/${url}`)});
-      },
-      (error) => {
-        if (error) console.error('Failed to register protocol');
-      },
+    'file',
+    (request, callback) => {
+      const url = request.url.substr(8);
+      callback({path: path.normalize(`${__dirname}/${url}`)});
+    },
+    (error) => {
+      if (error) console.error('Failed to register protocol');
+    },
   );
 }
 
@@ -106,14 +104,14 @@ app.whenReady().then(() => {
   createWindow();
   setupLocalFilesNormalizerProxy();
 
-  app.on('activate', function() {
+  app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
 
-app.on('window-all-closed', function() {
+app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
     app.quit();
   }

@@ -1,14 +1,21 @@
 import React, {Component} from 'react';
+import {v1 as uuidv1} from 'uuid';
 import AddCryptoAccount from './AddCryptoAccount';
 import 'react-datepicker/dist/react-datepicker.css';
 import {CryptoAccount} from '../../models/cryptoaccount';
+import CryptoAccountLine from '../../table/CryptoAccountLine';
 const {ipcRenderer} = window.require('electron');
 
-type CryptoOverviewState = {showNewAccountModal: boolean; isUpdate: boolean};
+type CryptoOverviewState = {
+  showNewAccountModal: boolean;
+  isUpdate: boolean;
+  accounts: CryptoAccount[];
+};
 
 export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   state: CryptoOverviewState = {
     showNewAccountModal: false,
+    accounts: [],
     isUpdate: false,
   };
 
@@ -19,8 +26,11 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   componentDidMount() {
     ipcRenderer.on(
       'list_crypto_accounts',
-      (_event: any, arg: CryptoAccount[]) => {},
+      (_event: any, arg: CryptoAccount[]) => {
+        this.setState({accounts: arg});
+      },
     );
+    ipcRenderer.send('list_crypto_accounts');
   }
 
   setShowNewAccountModal(show: boolean) {
@@ -33,15 +43,27 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   }
 
   onCreateAccount(acc: CryptoAccount) {
+    acc.id = uuidv1();
+    ipcRenderer.send('add_crypto_account', acc);
     this.setShowNewAccountModal(false);
   }
 
   onUpdateAccount(acc: CryptoAccount) {
+    ipcRenderer.send('update_crypto_account', acc);
     this.setShowNewAccountModal(false);
   }
 
   onCloseModal(): void {
     this.setShowNewAccountModal(false);
+  }
+
+  onEditAccount(acc: CryptoAccount) {
+    this.setState({isUpdate: true});
+    this.setShowNewAccountModal(true);
+  }
+
+  onDeleteAccount(acc: CryptoAccount) {
+    ipcRenderer.send('delete_crypto_account', acc);
   }
 
   render() {
@@ -89,14 +111,29 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
             <thead>
               <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                 <th className="py-3 px-6 text-left">Name</th>
-                <th className="py-3 px-6 text-right">Invested</th>
-                <th className="py-3 px-6 text-right">Uninvested</th>
-                <th className="py-3 px-6 text-right">Loss</th>
-                <th className="py-3 px-6 text-right">Profit</th>
-                <th className="py-3 px-6 text-right">Total</th>
+                <th className="py-3 px-6 text-left">Type</th>
+                <th className="py-3 px-6 text-left">Description</th>
+                <th className="py-3 px-6 text-right"></th>
               </tr>
             </thead>
-            <tbody className="text-gray-600 text-sm "></tbody>
+            <tbody className="text-gray-600 text-sm ">
+              {this.state.accounts
+                .sort((l, u) => {
+                  return l.name < u.name ? 1 : -1;
+                })
+                .map((item) => (
+                  <CryptoAccountLine
+                    key={item.id}
+                    account={item}
+                    onEditAccount={(acc: CryptoAccount) => {
+                      this.onEditAccount(acc);
+                    }}
+                    onDeleteAccount={(acc: CryptoAccount) => {
+                      this.onDeleteAccount(acc);
+                    }}
+                  ></CryptoAccountLine>
+                ))}
+            </tbody>
           </table>
           {this.state.showNewAccountModal ? (
             <AddCryptoAccount
