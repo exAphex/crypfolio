@@ -7,8 +7,7 @@
       "name": "Launch via NPM",
       "cwd": "${workspaceRoot}",
       "runtimeExecutable": "yarn",
-      "runtimeArgs": ["electron:start"],
-      "port": 9229
+      "runtimeArgs": ["electron:start"]
     }
   ]
 }

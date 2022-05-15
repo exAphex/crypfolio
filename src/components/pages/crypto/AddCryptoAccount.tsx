@@ -1,17 +1,24 @@
 import React, {ChangeEvent, Component} from 'react';
 import {
-  CryptoAccount,
   getAccountTypes,
-  getCopy,
+  CryptoAccountType,
+  CryptoAccount,
 } from '../../models/cryptoaccount';
 
 type AddCryptoAccountType = {
-  account: CryptoAccount;
+  name: string;
+  id: string;
+  description: string;
+  type: CryptoAccountType;
+  address: string;
   isUpdate: boolean;
 };
 
 type AddCryptoAccountProps = {
   isUpdate: boolean;
+  onCreateNewAccount: (acc: CryptoAccount) => void;
+  onUpdateAccount: (acc: CryptoAccount) => void;
+  onCloseModal: () => void;
 };
 
 export class AddCryptoAccount extends Component<
@@ -19,26 +26,48 @@ export class AddCryptoAccount extends Component<
   AddCryptoAccountType
 > {
   state: AddCryptoAccountType = {
-    account: new CryptoAccount('', '', '', {id: 'BINANCE', name: 'Binance'}),
+    name: '',
+    id: '',
+    description: '',
+    type: {id: 'BINANCE', name: 'Binance'},
+    address: '',
     isUpdate: false,
   };
 
-  componentWillUnmount() {}
-
-  componentDidMount() {}
-
-  updateNameValue(evt: React.ChangeEvent<HTMLInputElement>) {
-    const accCpy = getCopy(this.state.account);
-    accCpy.setName(evt.target.value);
-    this.setState({account: accCpy});
+  componentDidMount() {
+    this.setState({isUpdate: this.props.isUpdate});
   }
 
-  handleChangeType(evt: ChangeEvent) {}
+  updateNameValue(evt: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({name: evt.target.value});
+  }
+
+  handleChangeType(evt: React.ChangeEvent<HTMLSelectElement>) {
+    const types = getAccountTypes();
+    for (const t of types) {
+      if (t.name === evt.target.value) {
+        this.setState({type: t});
+      }
+    }
+  }
 
   updateDescriptionValue(evt: React.ChangeEvent<HTMLInputElement>) {
-    const accCpy = getCopy(this.state.account);
-    accCpy.setDescription(evt.target.value);
-    this.setState({account: accCpy});
+    this.setState({description: evt.target.value});
+  }
+
+  onSaveAccount() {
+    const acc = new CryptoAccount(
+      this.state.id,
+      this.state.name,
+      this.state.description,
+      this.state.type,
+      this.state.address,
+    );
+    if (!this.state.isUpdate) {
+      this.props.onCreateNewAccount(acc);
+    } else {
+      this.props.onUpdateAccount(acc);
+    }
   }
 
   render() {
@@ -100,7 +129,7 @@ export class AddCryptoAccount extends Component<
                         Name
                       </label>
                       <input
-                        value={this.state.account.getName()}
+                        value={this.state.name}
                         onChange={(evt) => this.updateNameValue(evt)}
                         type="text"
                         placeholder="Personal account"
@@ -145,7 +174,7 @@ export class AddCryptoAccount extends Component<
                         Description
                       </label>
                       <input
-                        value={this.state.account.getDescription()}
+                        value={this.state.description}
                         onChange={(evt) => this.updateDescriptionValue(evt)}
                         type="text"
                         placeholder="My own Personal account"
@@ -159,25 +188,7 @@ export class AddCryptoAccount extends Component<
                 <button
                   type="button"
                   onClick={() => {
-                    /*if (this.state.isUpdate) {
-                      this.props.onUpdateAccount(
-                        this.state.accountId,
-                        this.state.accountName,
-                        this.state.accountUser,
-                        this.state.accountPassword,
-                        this.state.accountDescription,
-                        this.state.accountAddress,
-                      );
-                    } else {
-                      this.props.onCreateNewAccount(
-                        this.state.accountName,
-                        this.state.type,
-                        this.state.accountUser,
-                        this.state.accountPassword,
-                        this.state.accountDescription,
-                        this.state.accountAddress,
-                      );
-                    }*/
+                    this.onSaveAccount();
                   }}
                   className={
                     'w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 ' +
@@ -191,6 +202,7 @@ export class AddCryptoAccount extends Component<
                 </button>
                 <button
                   type="button"
+                  onClick={() => this.props.onCloseModal()}
                   className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   Cancel

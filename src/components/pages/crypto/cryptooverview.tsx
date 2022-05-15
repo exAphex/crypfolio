@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import AddCryptoAccount from './AddCryptoAccount';
 import 'react-datepicker/dist/react-datepicker.css';
+import {CryptoAccount} from '../../models/cryptoaccount';
+const {ipcRenderer} = window.require('electron');
 
 type CryptoOverviewState = {showNewAccountModal: boolean; isUpdate: boolean};
 
@@ -10,9 +12,16 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     isUpdate: false,
   };
 
-  componentWillUnmount() {}
+  componentWillUnmount() {
+    ipcRenderer.removeAllListeners('list_crypto_accounts');
+  }
 
-  componentDidMount() {}
+  componentDidMount() {
+    ipcRenderer.on(
+      'list_crypto_accounts',
+      (_event: any, arg: CryptoAccount[]) => {},
+    );
+  }
 
   setShowNewAccountModal(show: boolean) {
     this.setState({showNewAccountModal: show});
@@ -21,6 +30,18 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   onAddAccount() {
     this.setState({isUpdate: false});
     this.setShowNewAccountModal(true);
+  }
+
+  onCreateAccount(acc: CryptoAccount) {
+    this.setShowNewAccountModal(false);
+  }
+
+  onUpdateAccount(acc: CryptoAccount) {
+    this.setShowNewAccountModal(false);
+  }
+
+  onCloseModal(): void {
+    this.setShowNewAccountModal(false);
   }
 
   render() {
@@ -78,7 +99,16 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
             <tbody className="text-gray-600 text-sm "></tbody>
           </table>
           {this.state.showNewAccountModal ? (
-            <AddCryptoAccount isUpdate={this.state.isUpdate}></AddCryptoAccount>
+            <AddCryptoAccount
+              isUpdate={this.state.isUpdate}
+              onCreateNewAccount={(acc: CryptoAccount) =>
+                this.onCreateAccount(acc)
+              }
+              onUpdateAccount={(acc: CryptoAccount) =>
+                this.onUpdateAccount(acc)
+              }
+              onCloseModal={() => this.onCloseModal()}
+            ></AddCryptoAccount>
           ) : null}
         </div>
       </div>

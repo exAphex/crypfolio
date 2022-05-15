@@ -1,6 +1,6 @@
 import {Account} from './account';
 
-type CryptoAccountType = {
+export type CryptoAccountType = {
   id: string;
   name: string;
 };
@@ -12,15 +12,18 @@ const accountTypes: CryptoAccountType[] = [
 
 export class CryptoAccount extends Account {
   private type: CryptoAccountType;
+  private address: string;
 
   constructor(
     id: string,
     name: string,
     description: string,
     type: CryptoAccountType,
+    address: string,
   ) {
     super(id, name, description);
     this.type = type;
+    this.address = address;
   }
 
   getType(): CryptoAccountType {
@@ -30,18 +33,16 @@ export class CryptoAccount extends Account {
   setType(type: CryptoAccountType): void {
     this.type = type;
   }
+
+  getAddress(): string {
+    return this.address;
+  }
+
+  setAddress(address: string) {
+    this.address = address;
+  }
 }
 
 export function getAccountTypes(): CryptoAccountType[] {
   return accountTypes;
-}
-
-export function getCopy(account: CryptoAccount): CryptoAccount {
-  const acc: CryptoAccount = new CryptoAccount(
-    account.getId(),
-    account.getName(),
-    account.getDescription(),
-    account.getType(),
-  );
-  return acc;
 }
