@@ -13,9 +13,7 @@ export class CryptoAccountLine extends Component<CryptoAccountLineProps, {}> {
     return (
       <tr className="border-b border-gray-200 hover:bg-gray-100">
         <td className="py-3 px-6 whitespace-nowrap">
-          <div className="flex">
-            <span className="font-medium">{this.props.account.name}</span>
-          </div>
+          <span className="font-medium">{this.props.account.name}</span>
         </td>
         <td className="py-3 px-6 text-left">
           <div className="flex">
@@ -24,9 +22,7 @@ export class CryptoAccountLine extends Component<CryptoAccountLineProps, {}> {
           </div>
         </td>
         <td className="py-3 px-6 text-left">
-          <div className="grid grid-cols-1 ">
-            <span>{this.props.account.description}</span>
-          </div>
+          <span>{this.props.account.description}</span>
         </td>
         <td className="py-3 px-6 text-center">
           <div className="flex item-center justify-end">

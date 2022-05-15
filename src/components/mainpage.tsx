@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {HashRouter, Routes, Route, Link} from 'react-router-dom';
 import Home from './pages/home';
-import CryptoOverview from './pages/crypto/cryptooverview';
+import CryptoOverview from './pages/crypto/CryptoOverview';
 import InfoOverview from './pages/info';
 
 type MainPageState = {selectedNavItem: string};
