@@ -1,4 +1,5 @@
 import {Account} from './account';
+import {CryptoTransaction} from './cryptotransaction';
 
 export type CryptoAccountType = {
   id: string;
@@ -18,6 +19,7 @@ export type CryptoAccountDTO = {
 export class CryptoAccount extends Account {
   type: CryptoAccountType;
   address: string;
+  transactions: CryptoTransaction[];
 
   constructor(
     id: string,
@@ -29,6 +31,7 @@ export class CryptoAccount extends Account {
     super(id, name, description);
     this.type = type;
     this.address = address;
+    this.transactions = [];
   }
 }
 

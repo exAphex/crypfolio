@@ -2,8 +2,12 @@ import React, {Component, createRef} from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
 import {useParams} from 'react-router-dom';
 import {CryptoAccount} from '../../models/cryptoaccount';
-import CSVReader from 'react-csv-reader';
+import {parseCSVArray} from '../../../utils/CSVImporter';
 import ImportCSVModal from './ImportCSVModal';
+import {CryptoTransaction} from '../../models/cryptotransaction';
+import {TransactionType} from '../../models/transaction';
+import CryptoTransactionLine from '../../table/CryptoTransactionLine';
+import {getBalance} from '../../../utils/CryptoCalculator';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
@@ -53,6 +57,18 @@ export class CryptoAccountDetail extends Component<
 
   onImportedFile(data: string[][]) {
     this.onCloseCSVModal();
+    const transactions: CryptoTransaction[] = parseCSVArray(data);
+    const candidateTransactions: CryptoTransaction[] = [];
+    for (const t of transactions) {
+      if (t.type === TransactionType.UNKNOWN) {
+        continue;
+      }
+      candidateTransactions.push(t);
+    }
+    ipcRenderer.send('add_crypto_account_transactions', {
+      id: this.state.account.id,
+      transactions: candidateTransactions,
+    });
   }
 
   render() {
@@ -94,19 +110,37 @@ export class CryptoAccountDetail extends Component<
           </div>
         </div>
         <div className="grid grid-cols-6">
-          <div className="col-start-2 col-span-4"></div>
+          <div className="col-start-2 col-span-4">
+            {getBalance(this.state.account.transactions)
+              .filter((item) => item.amount !== 0)
+              .filter((item) => Number(item.amount.toFixed(8)) !== 0)
+              .map((item) => (
+                <div>{item.symbol + ' - ' + item.amount.toFixed(8)}</div>
+              ))}
+          </div>
         </div>
         <div className="pt-4 pb-4">
           <table className="min-w-max w-full table-auto">
             <thead>
               <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                <th className="py-3 px-6 text-left">Name</th>
+                <th className="py-3 px-6 text-left">Date</th>
                 <th className="py-3 px-6 text-left">Type</th>
-                <th className="py-3 px-6 text-left">Description</th>
-                <th className="py-3 px-6 text-right"></th>
+                <th className="py-3 px-6 text-left">Coin</th>
+                <th className="py-3 px-6 text-right">Amount</th>
               </tr>
             </thead>
-            <tbody className="text-gray-600 text-sm "></tbody>
+            <tbody className="text-gray-600 text-sm ">
+              {this.state.account.transactions
+                .sort((l, u) => {
+                  return l.date < u.date ? 1 : -1;
+                })
+                .map((item) => (
+                  <CryptoTransactionLine
+                    key={item.id}
+                    transaction={item}
+                  ></CryptoTransactionLine>
+                ))}
+            </tbody>
           </table>
           {this.state.showImportCSVModal ? (
             <ImportCSVModal

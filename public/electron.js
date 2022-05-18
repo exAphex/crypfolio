@@ -23,6 +23,10 @@ ipcMain.on('update_crypto_account', (event, arg) => {
   CryptoAccountHandler.updateAccount(event, arg);
 });
 
+ipcMain.on('add_crypto_account_transactions', (event, arg) => {
+  CryptoAccountHandler.addAccountTransactions(event, arg);
+});
+
 ipcMain.on('get_crypto_account', (event, id) => {
   CryptoAccountHandler.getAccount(event, id);
 });

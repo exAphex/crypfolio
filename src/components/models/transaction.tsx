@@ -5,6 +5,12 @@ export enum TransactionType {
   DIVIDEND,
   STAKING_REWARD,
   INTEREST,
+  UNKNOWN,
+  DISTRIBUTION,
+  SELL,
+  BUY,
+  STAKE,
+  UNSTAKE,
 }
 
 export class Transaction {
@@ -38,5 +44,43 @@ export class Transaction {
 
   setType(type: TransactionType) {
     this.type = type;
+  }
+}
+
+export function getTransactionType(typeId: number) {
+  switch (typeId) {
+    case 0: {
+      return 'Deposit';
+    }
+    case 1: {
+      return 'Withdraw';
+    }
+    case 2: {
+      return 'Fee';
+    }
+    case 3: {
+      return 'Dividend';
+    }
+    case 4: {
+      return 'Staking reward';
+    }
+    case 7: {
+      return 'Distribution/Airdrop';
+    }
+    case 8: {
+      return 'Sell';
+    }
+    case 9: {
+      return 'Buy';
+    }
+    case 10: {
+      return 'Stake';
+    }
+    case 11: {
+      return 'Unstake';
+    }
+    default: {
+      return 'Unkown';
+    }
   }
 }
