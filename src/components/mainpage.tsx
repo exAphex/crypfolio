@@ -3,6 +3,7 @@ import {HashRouter, Routes, Route, Link} from 'react-router-dom';
 import Home from './pages/home';
 import CryptoOverview from './pages/crypto/CryptoOverview';
 import InfoOverview from './pages/info';
+import CryptoAccountDetail from './pages/crypto/CryptoAccountDetail';
 
 type MainPageState = {selectedNavItem: string};
 
@@ -96,6 +97,36 @@ export class MainPage extends Component<{}, MainPageState> {
                     <Link
                       className={
                         'flex items-center px-4 py-2 mt-5 text-gray-600 ' +
+                        this.getSelectedBg('ASSETS') +
+                        ' rounded-md hover:bg-gray-200'
+                      }
+                      onClick={() => {
+                        this.setSelected('ASSETS');
+                      }}
+                      to="/assets"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                      </svg>
+
+                      <span className="mx-4 font-medium">Assets</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={
+                        'flex items-center px-4 py-2 mt-5 text-gray-600 ' +
                         this.getSelectedBg('SETTINGS') +
                         ' rounded-md hover:bg-gray-200'
                       }
@@ -167,6 +198,10 @@ export class MainPage extends Component<{}, MainPageState> {
               <Route path="/" element={<Home />} />
               <Route path="/cryptos" element={<CryptoOverview />} />
               <Route path="/info" element={<InfoOverview />} />
+              <Route
+                path="/cryptodetail/:id"
+                element={<CryptoAccountDetail />}
+              />
             </Routes>
           </div>
         </div>

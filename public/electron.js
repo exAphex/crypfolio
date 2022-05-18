@@ -19,6 +19,14 @@ ipcMain.on('delete_crypto_account', (event, arg) => {
   CryptoAccountHandler.deleteAccount(event, arg);
 });
 
+ipcMain.on('update_crypto_account', (event, arg) => {
+  CryptoAccountHandler.updateAccount(event, arg);
+});
+
+ipcMain.on('get_crypto_account', (event, id) => {
+  CryptoAccountHandler.getAccount(event, id);
+});
+
 ipcMain.on('get-version', (event, arg) => {
   event.reply('query-version', app.getVersion());
 });

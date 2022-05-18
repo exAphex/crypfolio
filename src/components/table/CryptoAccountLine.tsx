@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {CryptoAccount} from '../models/cryptoaccount';
 import {getIconByAccountType} from '../../utils/utils';
+import {Link} from 'react-router-dom';
 
 type CryptoAccountLineProps = {
   account: CryptoAccount;
@@ -13,7 +14,12 @@ export class CryptoAccountLine extends Component<CryptoAccountLineProps, {}> {
     return (
       <tr className="border-b border-gray-200 hover:bg-gray-100">
         <td className="py-3 px-6 whitespace-nowrap">
-          <span className="font-medium">{this.props.account.name}</span>
+          <Link
+            className={'font-medium'}
+            to={'/cryptodetail/' + this.props.account.id}
+          >
+            <span className="font-bold">{this.props.account.name}</span>
+          </Link>
         </td>
         <td className="py-3 px-6 text-left">
           <div className="flex">

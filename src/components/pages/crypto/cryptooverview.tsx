@@ -10,6 +10,7 @@ type CryptoOverviewState = {
   showNewAccountModal: boolean;
   isUpdate: boolean;
   accounts: CryptoAccount[];
+  selectedAccount: CryptoAccount;
 };
 
 export class CryptoOverview extends Component<{}, CryptoOverviewState> {
@@ -17,6 +18,13 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     showNewAccountModal: false,
     accounts: [],
     isUpdate: false,
+    selectedAccount: new CryptoAccount(
+      '',
+      '',
+      '',
+      {id: 'BINANCE', name: 'Binance'},
+      '',
+    ),
   };
 
   componentWillUnmount() {
@@ -38,7 +46,16 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   }
 
   onAddAccount() {
-    this.setState({isUpdate: false});
+    this.setState({
+      isUpdate: false,
+      selectedAccount: new CryptoAccount(
+        '',
+        '',
+        '',
+        {id: 'BINANCE', name: 'Binance'},
+        '',
+      ),
+    });
     this.setShowNewAccountModal(true);
   }
 
@@ -58,7 +75,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   }
 
   onEditAccount(acc: CryptoAccount) {
-    this.setState({isUpdate: true});
+    this.setState({isUpdate: true, selectedAccount: acc});
     this.setShowNewAccountModal(true);
   }
 
@@ -138,6 +155,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
           {this.state.showNewAccountModal ? (
             <AddCryptoAccount
               isUpdate={this.state.isUpdate}
+              account={this.state.selectedAccount}
               onCreateNewAccount={(acc: CryptoAccount) =>
                 this.onCreateAccount(acc)
               }

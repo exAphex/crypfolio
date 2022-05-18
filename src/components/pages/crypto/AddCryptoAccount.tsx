@@ -1,3 +1,4 @@
+import {access} from 'fs';
 import React, {Component} from 'react';
 import {
   getAccountTypes,
@@ -15,6 +16,7 @@ type AddCryptoAccountType = {
 };
 
 type AddCryptoAccountProps = {
+  account: CryptoAccount;
   isUpdate: boolean;
   onCreateNewAccount: (acc: CryptoAccount) => void;
   onUpdateAccount: (acc: CryptoAccount) => void;
@@ -35,6 +37,17 @@ export class AddCryptoAccount extends Component<
   };
 
   componentDidMount() {
+    const currAccount: CryptoAccount = this.props.account;
+    if (currAccount) {
+      this.setState({
+        id: currAccount.id,
+        name: currAccount.name,
+        description: currAccount.description,
+        type: currAccount.type,
+        address: currAccount.address,
+      });
+    }
+
     this.setState({isUpdate: this.props.isUpdate});
   }
 
