@@ -8,6 +8,7 @@ import {CryptoTransaction} from '../../models/cryptotransaction';
 import {TransactionType} from '../../models/transaction';
 import CryptoTransactionLine from '../../table/CryptoTransactionLine';
 import {getBalance} from '../../../utils/CryptoCalculator';
+import CryptoHoldings from './CryptoHoldings';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
@@ -109,22 +110,19 @@ export class CryptoAccountDetail extends Component<
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-6">
-          <div className="col-start-2 col-span-4">
-            {getBalance(this.state.account.transactions)
-              .filter((item) => item.amount !== 0)
-              .filter((item) => Number(item.amount.toFixed(8)) !== 0)
-              .map((item) => (
-                <div>{item.symbol + ' - ' + item.amount.toFixed(8)}</div>
-              ))}
-          </div>
+
+        <div className="pt-4 pb-4">
+          <CryptoHoldings
+            transactions={this.state.account.transactions}
+          ></CryptoHoldings>
         </div>
+
         <div className="pt-4 pb-4">
           <table className="min-w-max w-full table-auto">
             <thead>
               <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
                 <th className="py-3 px-6 text-left">Date</th>
-                <th className="py-3 px-6 text-left">Type</th>
+                <th className="py-3 px-6 text-center">Type</th>
                 <th className="py-3 px-6 text-left">Coin</th>
                 <th className="py-3 px-6 text-right">Amount</th>
               </tr>
