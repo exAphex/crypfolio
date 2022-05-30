@@ -1,11 +1,28 @@
 import React, {Component} from 'react';
+import {Asset} from '../../models/asset';
+import {CryptoAsset} from '../../models/CryptoAsset';
+import AssetLine from '../../table/AssetLine';
+const {ipcRenderer} = window.require('electron');
 
-export class AssetOverview extends Component<{}, {}> {
-  state = {};
+type AssetOverviewState = {
+  cryptoAssets: CryptoAsset[];
+};
 
-  componentWillUnmount() {}
+export class AssetOverview extends Component<{}, AssetOverviewState> {
+  state: AssetOverviewState = {
+    cryptoAssets: [],
+  };
 
-  componentDidMount() {}
+  componentWillUnmount() {
+    ipcRenderer.removeAllListeners('list_crypto_assets');
+  }
+
+  componentDidMount() {
+    ipcRenderer.on('list_crypto_assets', (_event: any, arg: CryptoAsset[]) => {
+      this.setState({cryptoAssets: arg});
+    });
+    ipcRenderer.send('list_crypto_assets');
+  }
 
   onImportCSV() {}
 
@@ -56,10 +73,23 @@ export class AssetOverview extends Component<{}, {}> {
                 <th className="py-3 px-6 text-left">Name</th>
                 <th className="py-3 px-6 text-left">Type</th>
                 <th className="py-3 px-6 text-left">Description</th>
-                <th className="py-3 px-6 text-right"></th>
+                <th className="py-3 px-6 text-left">Symbol</th>
+                <th className="py-3 px-6 text-left">Latest update</th>
+                <th className="py-3 px-6 text-left"></th>
               </tr>
             </thead>
-            <tbody className="text-gray-600 text-sm "></tbody>
+            <tbody className="text-gray-600 text-sm ">
+              {this.state.cryptoAssets.map((item) => (
+                <AssetLine
+                  key={item.id}
+                  asset={item}
+                  onDeleteAsset={(asset: Asset) => {}}
+                  onEditAsset={(asset: Asset) => {}}
+                  onHardRefreshAsset={(asset: Asset) => {}}
+                  onRefreshAsset={(asset: Asset) => {}}
+                ></AssetLine>
+              ))}
+            </tbody>
           </table>
         </div>
       </div>

@@ -6,6 +6,7 @@ const {ipcMain} = require('electron');
 const store = require('electron-json-storage');
 const fetch = require('node-fetch');
 const CryptoAccountHandler = require('./js/handlers/CryptoAccountHandler.js');
+const CryptoAssetHandler = require('./js/handlers/CryptoAssetHandler.js');
 
 ipcMain.on('list_crypto_accounts', (event, arg) => {
   CryptoAccountHandler.listAccounts(event);
@@ -29,6 +30,14 @@ ipcMain.on('add_crypto_account_transactions', (event, arg) => {
 
 ipcMain.on('get_crypto_account', (event, id) => {
   CryptoAccountHandler.getAccount(event, id);
+});
+
+ipcMain.on('list_crypto_assets', (event, arg) => {
+  CryptoAssetHandler.listAssets(event);
+});
+
+ipcMain.on('add_crypto_assets', (event, id) => {
+  CryptoAssetHandler.addCryptoAssets(event, id);
 });
 
 ipcMain.on('get-version', (event, arg) => {

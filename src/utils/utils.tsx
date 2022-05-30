@@ -18,3 +18,11 @@ export function getIconByAccountType(type: CryptoAccountType) {
       return null;
   }
 }
+
+export function lowerCase(data: string) {
+  if (data === null || data === undefined) {
+    return null;
+  } else {
+    return data.toLowerCase();
+  }
+}

@@ -1,14 +1,14 @@
 import React, {Component, createRef} from 'react';
-import 'react-datepicker/dist/react-datepicker.css';
 import {useParams} from 'react-router-dom';
 import {CryptoAccount} from '../../models/cryptoaccount';
 import {parseCSVArray} from '../../../utils/CSVImporter';
+import {lowerCase} from '../../../utils/utils';
 import ImportCSVModal from './ImportCSVModal';
 import {CryptoTransaction} from '../../models/cryptotransaction';
 import {TransactionType} from '../../models/transaction';
 import CryptoTransactionLine from '../../table/CryptoTransactionLine';
-import {getBalance} from '../../../utils/CryptoCalculator';
 import CryptoHoldings from './CryptoHoldings';
+import {CryptoAsset} from '../../models/CryptoAsset';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
@@ -70,6 +70,29 @@ export class CryptoAccountDetail extends Component<
       id: this.state.account.id,
       transactions: candidateTransactions,
     });
+
+    ipcRenderer.send('add_crypto_assets', {
+      assets: this.getAssetCandidates(candidateTransactions),
+    });
+  }
+
+  getAssetCandidates(transactions: CryptoTransaction[]): CryptoAsset[] {
+    const retAssets: CryptoAsset[] = [];
+    for (const t of transactions) {
+      if (!this.isAssetDuplicate(retAssets, t.symbol)) {
+        retAssets.push(new CryptoAsset(t.symbol, t.symbol, '', ''));
+      }
+    }
+    return retAssets;
+  }
+
+  isAssetDuplicate(assets: CryptoAsset[], symbol: string): boolean {
+    for (const a of assets) {
+      if (lowerCase(a.id) === lowerCase(symbol)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   render() {

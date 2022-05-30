@@ -76,15 +76,6 @@ export function getTransactionType(
     case 'Savings Interest': {
       return TransactionType.STAKING_REWARD;
     }
-    case 'Savings purchase': {
-      return TransactionType.STAKE;
-    }
-    case 'POS savings purchase': {
-      return TransactionType.STAKE;
-    }
-    case 'Savings Principal redemption': {
-      return TransactionType.UNSTAKE;
-    }
     case 'Sell': {
       return TransactionType.SELL;
     }
