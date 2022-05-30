@@ -1,16 +1,16 @@
 import React, {Component} from 'react';
-import {Asset} from '../models/asset';
+import {CryptoAsset} from '../models/CryptoAsset';
 
 type AssetLineProps = {
-  asset: Asset;
-  onRefreshAsset: (acc: Asset) => void;
-  onHardRefreshAsset: (acc: Asset) => void;
-  onEditAsset: (acc: Asset) => void;
-  onDeleteAsset: (acc: Asset) => void;
+  asset: CryptoAsset;
+  onRefreshAsset: (acc: CryptoAsset) => void;
+  onHardRefreshAsset: (acc: CryptoAsset) => void;
+  onEditAsset: (acc: CryptoAsset) => void;
+  onDeleteAsset: (acc: CryptoAsset) => void;
 };
 
 export class AssetLine extends Component<AssetLineProps, {}> {
-  formatLastUpdate(asset: Asset): string {
+  formatLastUpdate(asset: CryptoAsset): string {
     if (!asset.latestUpdate) {
       return '-';
     }

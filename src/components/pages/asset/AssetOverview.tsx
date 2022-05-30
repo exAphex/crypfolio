@@ -2,15 +2,20 @@ import React, {Component} from 'react';
 import {Asset} from '../../models/asset';
 import {CryptoAsset} from '../../models/CryptoAsset';
 import AssetLine from '../../table/AssetLine';
+import EditAssetModal from './EditAssetModal';
 const {ipcRenderer} = window.require('electron');
 
 type AssetOverviewState = {
   cryptoAssets: CryptoAsset[];
+  showEditAssetModal: boolean;
+  selectedAsset: CryptoAsset;
 };
 
 export class AssetOverview extends Component<{}, AssetOverviewState> {
   state: AssetOverviewState = {
     cryptoAssets: [],
+    showEditAssetModal: false,
+    selectedAsset: new CryptoAsset('', '', '', ''),
   };
 
   componentWillUnmount() {
@@ -24,7 +29,17 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
     ipcRenderer.send('list_crypto_assets');
   }
 
-  onImportCSV() {}
+  onRefreshAllAssets() {}
+
+  onUpdateCryptoAsset(asset: CryptoAsset) {}
+
+  onCloseModal() {
+    this.setState({showEditAssetModal: false});
+  }
+
+  onEditCryptoAsset(asset: CryptoAsset) {
+    this.setState({selectedAsset: asset, showEditAssetModal: true});
+  }
 
   render() {
     return (
@@ -39,7 +54,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
             <div className="pt-2 flex gap-2">
               <div className="shadow rounded-lg flex mr-2">
                 <button
-                  onClick={() => this.onImportCSV()}
+                  onClick={() => this.onRefreshAllAssets()}
                   type="button"
                   className="rounded-lg inline-flex items-center bg-white hover:text-purple-500 focus:outline-none focus:shadow-outline text-gray-500 font-semibold py-2 px-2 md:px-4"
                 >
@@ -49,15 +64,15 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
-                    strokeWidth="2"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
+                      strokeWidth="2"
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
-                  <span className="hidden md:block ml-2">Import CSV</span>
+                  <span className="hidden md:block ml-2">Refresh</span>
                 </button>
               </div>
             </div>
@@ -79,19 +94,34 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
               </tr>
             </thead>
             <tbody className="text-gray-600 text-sm ">
-              {this.state.cryptoAssets.map((item) => (
-                <AssetLine
-                  key={item.id}
-                  asset={item}
-                  onDeleteAsset={(asset: Asset) => {}}
-                  onEditAsset={(asset: Asset) => {}}
-                  onHardRefreshAsset={(asset: Asset) => {}}
-                  onRefreshAsset={(asset: Asset) => {}}
-                ></AssetLine>
-              ))}
+              {this.state.cryptoAssets
+                .sort((l, u) => {
+                  return l.name > u.name ? 1 : -1;
+                })
+                .map((item) => (
+                  <AssetLine
+                    key={item.id}
+                    asset={item}
+                    onDeleteAsset={(asset: Asset) => {}}
+                    onEditAsset={(asset: CryptoAsset) => {
+                      this.onEditCryptoAsset(asset);
+                    }}
+                    onHardRefreshAsset={(asset: Asset) => {}}
+                    onRefreshAsset={(asset: Asset) => {}}
+                  ></AssetLine>
+                ))}
             </tbody>
           </table>
         </div>
+        {this.state.showEditAssetModal ? (
+          <EditAssetModal
+            asset={this.state.selectedAsset}
+            onUpdateCryptoAsset={(asset: CryptoAsset) =>
+              this.onUpdateCryptoAsset(asset)
+            }
+            onCloseModal={() => this.onCloseModal()}
+          ></EditAssetModal>
+        ) : null}
       </div>
     );
   }
