@@ -9,6 +9,8 @@ import {TransactionType} from '../../models/transaction';
 import CryptoTransactionLine from '../../table/CryptoTransactionLine';
 import CryptoHoldings from './CryptoHoldings';
 import {CryptoAsset} from '../../models/CryptoAsset';
+import {CryptoTransactionDTO} from '../../models/dto/CryptoTransactionDTO';
+import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
@@ -32,7 +34,7 @@ export class CryptoAccountDetail extends Component<
   CryptoAccountDetailState
 > {
   state = {
-    account: new CryptoAccount('', '', '', {id: '', name: ''}, ''),
+    account: new CryptoAccount('', '', '', {id: '', name: ''}, '', []),
     showImportCSVModal: false,
   };
   myRef = createRef();
@@ -42,9 +44,12 @@ export class CryptoAccountDetail extends Component<
   }
 
   componentDidMount() {
-    ipcRenderer.on('get_crypto_account', (_event: any, arg: CryptoAccount) => {
-      this.setState({account: arg});
-    });
+    ipcRenderer.on(
+      'get_crypto_account',
+      (_event: any, arg: CryptoAccountDTO) => {
+        this.setState({account: getAccount(arg)});
+      },
+    );
     ipcRenderer.send('get_crypto_account', this.props.params.id);
   }
 
@@ -59,12 +64,12 @@ export class CryptoAccountDetail extends Component<
   onImportedFile(data: string[][]) {
     this.onCloseCSVModal();
     const transactions: CryptoTransaction[] = parseCSVArray(data);
-    const candidateTransactions: CryptoTransaction[] = [];
+    const candidateTransactions: CryptoTransactionDTO[] = [];
     for (const t of transactions) {
-      if (t.type === TransactionType.UNKNOWN) {
+      if (t.type === TransactionType.UNKNOWN || lowerCase(t.symbol) === 'eur') {
         continue;
       }
-      candidateTransactions.push(t);
+      candidateTransactions.push(new CryptoTransactionDTO(t));
     }
     ipcRenderer.send('add_crypto_account_transactions', {
       id: this.state.account.id,
@@ -76,7 +81,7 @@ export class CryptoAccountDetail extends Component<
     });
   }
 
-  getAssetCandidates(transactions: CryptoTransaction[]): CryptoAsset[] {
+  getAssetCandidates(transactions: CryptoTransactionDTO[]): CryptoAsset[] {
     const retAssets: CryptoAsset[] = [];
     for (const t of transactions) {
       if (!this.isAssetDuplicate(retAssets, t.symbol)) {
@@ -87,6 +92,10 @@ export class CryptoAccountDetail extends Component<
   }
 
   isAssetDuplicate(assets: CryptoAsset[], symbol: string): boolean {
+    if (lowerCase(symbol) === 'eur') {
+      return true;
+    }
+
     for (const a of assets) {
       if (lowerCase(a.id) === lowerCase(symbol)) {
         return true;

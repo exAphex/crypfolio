@@ -75,6 +75,7 @@ export class AddCryptoAccount extends Component<
       this.state.description,
       this.state.type,
       this.state.address,
+      [],
     );
     if (!this.state.isUpdate) {
       this.props.onCreateNewAccount(acc);

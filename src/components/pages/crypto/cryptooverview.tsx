@@ -24,6 +24,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
       '',
       {id: 'BINANCE', name: 'Binance'},
       '',
+      [],
     ),
   };
 
@@ -54,6 +55,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
         '',
         {id: 'BINANCE', name: 'Binance'},
         '',
+        [],
       ),
     });
     this.setShowNewAccountModal(true);

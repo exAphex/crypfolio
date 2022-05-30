@@ -27,11 +27,12 @@ export class CryptoAccount extends Account {
     description: string,
     type: CryptoAccountType,
     address: string,
+    transactions: CryptoTransaction[],
   ) {
     super(id, name, description);
     this.type = type;
     this.address = address;
-    this.transactions = [];
+    this.transactions = transactions;
   }
 }
 

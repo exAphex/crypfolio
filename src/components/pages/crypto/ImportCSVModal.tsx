@@ -18,7 +18,7 @@ export class ImportCSVModal extends Component<
   ImportCSVModalState
 > {
   state: ImportCSVModalState = {
-    account: new CryptoAccount('', '', '', {id: '', name: ''}, ''),
+    account: new CryptoAccount('', '', '', {id: '', name: ''}, '', []),
     data: [],
   };
 
