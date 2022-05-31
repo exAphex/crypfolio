@@ -44,6 +44,24 @@ const addCryptoAssets = (event, arg) => {
   event.reply('list_crypto_assets', assets);
 };
 
+const updateAsset = (event, arg) => {
+  let assets = store.getSync('crypto_assets');
+  if (!assets || !Array.isArray(assets)) {
+    assets = [];
+  }
+
+  for (let i = 0; i < assets.length; i++) {
+    if (assets[i].id === arg.id) {
+      assets[i].name = arg.name;
+      assets[i].description = arg.description;
+      break;
+    }
+  }
+
+  store.set('crypto_assets', assets);
+  event.reply('list_crypto_assets', assets);
+};
+
 const checkForDuplicate = (assets, candidate) => {
   for (let j = 0; j < assets.length; j++) {
     if (assets[j].name === candidate.name) {
@@ -56,3 +74,4 @@ const checkForDuplicate = (assets, candidate) => {
 exports.queryCryptoPriceHistory = queryCryptoPriceHistory;
 exports.addCryptoAssets = addCryptoAssets;
 exports.listAssets = listAssets;
+exports.updateAsset = updateAsset;

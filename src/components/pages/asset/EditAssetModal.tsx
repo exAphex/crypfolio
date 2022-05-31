@@ -5,7 +5,6 @@ type EditAssetState = {
   id: string;
   name: string;
   description: string;
-  symbol: string;
   type: string;
 };
 
@@ -20,7 +19,6 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
     id: '',
     name: '',
     description: '',
-    symbol: '',
     type: '',
   };
 
@@ -32,7 +30,6 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
         name: currAsset.name,
         description: currAsset.description,
         type: currAsset.type,
-        symbol: currAsset.symbol,
       });
     }
   }
@@ -45,17 +42,13 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
     this.setState({description: evt.target.value});
   }
 
-  updateSymbolValue(evt: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({symbol: evt.target.value});
-  }
-
   onSaveAsset() {
     this.props.onUpdateCryptoAsset(
       new CryptoAsset(
         this.state.id,
         this.state.name,
         this.state.description,
-        this.state.symbol,
+        '',
       ),
     );
   }
@@ -116,18 +109,6 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
                         onChange={(evt) => this.updateDescriptionValue(evt)}
                         type="text"
                         placeholder=""
-                        className="px-4 h-10 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded border border-grey-lighter w-full"
-                      />
-                    </div>
-                    <div className="mb-1 w-full flex-col mt-3">
-                      <label className="font-medium text-gray-800 py-2">
-                        Symbol
-                      </label>
-                      <input
-                        value={this.state.symbol}
-                        onChange={(evt) => this.updateSymbolValue(evt)}
-                        type="text"
-                        placeholder="Coingecko symbol"
                         className="px-4 h-10 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded border border-grey-lighter w-full"
                       />
                     </div>

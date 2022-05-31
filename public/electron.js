@@ -40,6 +40,10 @@ ipcMain.on('add_crypto_assets', (event, id) => {
   CryptoAssetHandler.addCryptoAssets(event, id);
 });
 
+ipcMain.on('update_crypto_asset', (event, id) => {
+  CryptoAssetHandler.updateAsset(event, id);
+});
+
 ipcMain.on('get-version', (event, arg) => {
   event.reply('query-version', app.getVersion());
 });
