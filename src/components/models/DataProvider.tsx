@@ -10,6 +10,19 @@ export class DataProvider {
   }
 }
 
+const availableDataProvider: [DataProvider] = [
+  new DataProvider('COINGECKO', 'Coingecko', ''),
+];
+
 export function getAvailableProvider(): DataProvider[] {
-  return [new DataProvider('COINGECKO', 'Coingecko', '')];
+  return availableDataProvider;
+}
+
+export function getDataProviderNameById(id: string): string {
+  for (const d of availableDataProvider) {
+    if (d.id === id) {
+      return d.name;
+    }
+  }
+  return '';
 }

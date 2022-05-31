@@ -45,6 +45,10 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
     this.setState({selectedAsset: asset, showEditAssetModal: true});
   }
 
+  onRefreshCryptoAsset(asset: CryptoAsset) {
+    ipcRenderer.send('soft_query_crypto_asset', new CryptoAssetDTO(asset));
+  }
+
   render() {
     return (
       <div className="h-full flex flex-col">
@@ -111,7 +115,9 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
                       this.onEditCryptoAsset(asset);
                     }}
                     onHardRefreshAsset={(asset: Asset) => {}}
-                    onRefreshAsset={(asset: Asset) => {}}
+                    onRefreshAsset={(asset: CryptoAsset) =>
+                      this.onRefreshCryptoAsset(asset)
+                    }
                   ></AssetLine>
                 ))}
             </tbody>

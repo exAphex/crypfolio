@@ -7,6 +7,6 @@ export class CryptoAssetDTO extends AssetDTO {
 
   constructor(asset: CryptoAsset) {
     super(asset);
-    this.dataProvider = new DataProvider('COINGECKO', 'Coingecko', '');
+    this.dataProvider = asset.dataProvider;
   }
 }

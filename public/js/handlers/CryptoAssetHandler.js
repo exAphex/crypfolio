@@ -1,4 +1,5 @@
 const store = require('electron-json-storage');
+const CoinGeckoProvider = require('../dataprovider/CoinGeckoProvider');
 
 const listAssets = (event) => {
   let assets = store.getSync('crypto_assets');
@@ -13,13 +14,19 @@ const listAssets = (event) => {
   event.reply('list_crypto_assets', assets);
 };
 
-const queryCryptoPriceHistory = (event) => {
+const queryCryptoPriceHistory = (event, arg) => {
   let assets = store.getSync('crypto_assets');
   if (!assets || !Array.isArray(assets)) {
     assets = [];
   }
+  for (let i = 0; i < assets.length; i++) {
+    if (assets[i].id === arg.id) {
+      assets[i] = softQueryPriceData(assets[i]);
+    }
+  }
+
   store.set('crypto_assets', assets);
-  event.reply('list_crypto_prices', assets);
+  event.reply('list_crypto_assets', assets);
 };
 
 const addCryptoAssets = (event, arg) => {
@@ -30,7 +37,7 @@ const addCryptoAssets = (event, arg) => {
 
   let candidates = arg.assets;
   for (let i = 0; i < candidates.length; i++) {
-    if (!candidates[i].id || !candidates[i].name) {
+    if (!candidates[i].id || !candidates[i].name || !candidates[i].symbol) {
       continue;
     }
 
@@ -54,6 +61,11 @@ const updateAsset = (event, arg) => {
     if (assets[i].id === arg.id) {
       assets[i].name = arg.name;
       assets[i].description = arg.description;
+      assets[i].dataProvider = {
+        id: arg.dataProvider.id,
+        name: arg.dataProvider.name,
+        queryIdentifier: arg.dataProvider.queryIdentifier,
+      };
       break;
     }
   }
@@ -64,11 +76,61 @@ const updateAsset = (event, arg) => {
 
 const checkForDuplicate = (assets, candidate) => {
   for (let j = 0; j < assets.length; j++) {
-    if (assets[j].name === candidate.name) {
+    if (toLowerCase(assets[j].symbol) === toLowerCase(candidate.symbol)) {
       return true;
     }
   }
   return false;
+};
+
+// tolowercase util
+const toLowerCase = (str) => {
+  if (str && str.toLowerCase) {
+    return str.toLowerCase();
+  } else {
+    return null;
+  }
+};
+
+const softQueryPriceData = (asset) => {
+  if (
+    !asset.dataProvider.queryIdentifier ||
+    asset.dataProvider.queryIdentifier === ''
+  ) {
+    throw 'No dataprovider or identifier set!';
+  }
+  var today = new Date();
+  var maxDate = 0;
+  if (asset.prices && asset.prices.length > 0) {
+    var sortedPrices = asset.prices.sort((l, u) => {
+      return l.date < u.date ? 1 : -1;
+    });
+    maxDate = sortedPrices[0].date;
+  }
+  var queryData = CoinGeckoProvider.getCoinPricesBetween(
+    asset.dataProvider.queryIdentifier,
+    maxDate,
+    today.getTime(),
+    'eur',
+  );
+
+  asset.prices = mergePriceData(asset.prices, queryData);
+  asset.latestUpdate = today.getTime();
+  return asset;
+};
+
+const mergePriceData = (prices, queriedPrices) => {
+  var sortedPrices = queriedPrices.sort((l, u) => {
+    return l.date > u.date ? 1 : -1;
+  });
+  for (var i = 0; i < sortedPrices.length; i++) {
+    prices = CoinGeckoProvider.upsertTimeData(
+      prices,
+      sortedPrices[i].date,
+      sortedPrices[i].value,
+    );
+  }
+  return prices;
 };
 
 exports.queryCryptoPriceHistory = queryCryptoPriceHistory;

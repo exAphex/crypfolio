@@ -14,6 +14,8 @@ export class AssetDTO {
     this.description = asset.description;
     this.type = asset.type;
     this.symbol = asset.symbol;
-    this.latestUpdate = asset.latestUpdate.getTime();
+    this.latestUpdate = asset.latestUpdate.getTime
+      ? asset.latestUpdate.getTime()
+      : 0;
   }
 }

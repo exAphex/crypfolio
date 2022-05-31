@@ -1,11 +1,19 @@
 import React, {Component} from 'react';
 import {CryptoAsset} from '../../models/CryptoAsset';
+import {
+  DataProvider,
+  getAvailableProvider,
+  getDataProviderNameById,
+} from '../../models/DataProvider';
 
 type EditAssetState = {
   id: string;
   name: string;
   description: string;
   type: string;
+  availableDataProviders: DataProvider[];
+  dataProviderID: string;
+  dataProviderIdentifier: string;
 };
 
 type EditAssetProps = {
@@ -20,6 +28,9 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
     name: '',
     description: '',
     type: '',
+    availableDataProviders: getAvailableProvider(),
+    dataProviderID: 'COINGECKO',
+    dataProviderIdentifier: '',
   };
 
   componentDidMount() {
@@ -30,6 +41,8 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
         name: currAsset.name,
         description: currAsset.description,
         type: currAsset.type,
+        dataProviderID: currAsset.dataProvider.id,
+        dataProviderIdentifier: currAsset.dataProvider.queryIdentifier,
       });
     }
   }
@@ -42,15 +55,34 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
     this.setState({description: evt.target.value});
   }
 
+  updateAssetIdentifierValue(evt: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({dataProviderIdentifier: evt.target.value});
+  }
+
   onSaveAsset() {
-    this.props.onUpdateCryptoAsset(
-      new CryptoAsset(
-        this.state.id,
-        this.state.name,
-        this.state.description,
-        '',
-      ),
+    const asset = new CryptoAsset(
+      this.state.id,
+      this.state.name,
+      this.state.description,
+      '',
     );
+    asset.dataProvider = new DataProvider(
+      this.state.dataProviderID,
+      getDataProviderNameById(this.state.dataProviderID),
+      this.state.dataProviderIdentifier,
+    );
+    this.props.onUpdateCryptoAsset(asset);
+  }
+
+  handleChangeType(evt: React.ChangeEvent<HTMLSelectElement>) {
+    const providers = this.state.availableDataProviders;
+    for (const t of providers) {
+      if (t.name === evt.target.value) {
+        this.setState({dataProviderID: t.id, dataProviderIdentifier: ''});
+        break;
+      }
+    }
+    return 'Coingecko';
   }
 
   render() {
@@ -107,6 +139,48 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
                       <input
                         value={this.state.description}
                         onChange={(evt) => this.updateDescriptionValue(evt)}
+                        type="text"
+                        placeholder=""
+                        className="px-4 h-10 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded border border-grey-lighter w-full"
+                      />
+                    </div>
+                    <div className="mb-1 w-full flex-col mt-3">
+                      <label className="font-medium text-gray-800 py-2">
+                        Data provider
+                      </label>
+                      <div className="relative ">
+                        <svg
+                          className="w-2 h-2 absolute top-0 right-0 m-4 pointer-events-none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 412 232"
+                        >
+                          <path
+                            d="M206 171.144L42.678 7.822c-9.763-9.763-25.592-9.763-35.355 0-9.763 9.764-9.763 25.592 0 35.355l181 181c4.88 4.882 11.279 7.323 17.677 7.323s12.796-2.441 17.678-7.322l181-181c9.763-9.764 9.763-25.592 0-35.355-9.763-9.763-25.592-9.763-35.355 0L206 171.144z"
+                            fill="#648299"
+                            fillRule="nonzero"
+                          />
+                        </svg>
+                        <select
+                          onChange={(evt) => this.handleChangeType(evt)}
+                          className="px-4 h-10 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded border border-grey-lighter w-full"
+                        >
+                          {this.state.availableDataProviders
+                            .sort((l, u) => {
+                              return l.name > u.name ? 1 : -1;
+                            })
+                            .map((item) => (
+                              <option key={item.name}>{item.name}</option>
+                            ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="mb-1 w-full flex-col mt-3">
+                      <label className="font-medium text-gray-800 py-2">
+                        Asset identifier
+                      </label>
+                      <input
+                        value={this.state.dataProviderIdentifier}
+                        onChange={(evt) => this.updateAssetIdentifierValue(evt)}
                         type="text"
                         placeholder=""
                         className="px-4 h-10 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded border border-grey-lighter w-full"

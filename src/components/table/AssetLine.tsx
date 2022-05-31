@@ -23,7 +23,31 @@ export class AssetLine extends Component<AssetLineProps, {}> {
     return (
       <tr className="border-b border-gray-200 hover:bg-gray-100">
         <td className="py-3 px-6 whitespace-nowrap">
-          <span className="font-bold">{this.props.asset.name}</span>
+          <div className="flex">
+            {!this.props.asset.dataProvider ||
+            !this.props.asset.dataProvider.id ||
+            !this.props.asset.dataProvider.name ||
+            !this.props.asset.dataProvider.queryIdentifier ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="orange"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            ) : (
+              <></>
+            )}
+
+            <span className="font-bold pl-2">{this.props.asset.name}</span>
+          </div>
         </td>
         <td className="py-3 px-6 text-left">
           <span>{this.props.asset.type}</span>
@@ -40,7 +64,7 @@ export class AssetLine extends Component<AssetLineProps, {}> {
         <td className="py-3 px-6 text-center">
           <div className="flex item-center justify-end">
             <div
-              onClick={() => this.props.onEditAsset(this.props.asset)}
+              onClick={() => this.props.onRefreshAsset(this.props.asset)}
               className="w-4 mr-2 transform hover:text-purple-500 hover:scale-110"
             >
               <svg
