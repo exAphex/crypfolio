@@ -85,7 +85,9 @@ export class CryptoAccountDetail extends Component<
     const retAssets: CryptoAsset[] = [];
     for (const t of transactions) {
       if (!this.isAssetDuplicate(retAssets, t.symbol)) {
-        retAssets.push(new CryptoAsset(t.symbol, t.symbol, '', t.symbol));
+        retAssets.push(
+          new CryptoAsset(t.symbol, t.symbol, '', t.symbol, new Date(0)),
+        );
       }
     }
     return retAssets;

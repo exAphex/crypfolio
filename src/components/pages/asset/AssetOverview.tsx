@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Asset} from '../../models/asset';
 import {CryptoAsset} from '../../models/CryptoAsset';
-import {CryptoAssetDTO} from '../../models/dto/CryptoAssetDTO';
+import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
 import AssetLine from '../../table/AssetLine';
 import EditAssetModal from './EditAssetModal';
 const {ipcRenderer} = window.require('electron');
@@ -16,7 +16,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
   state: AssetOverviewState = {
     cryptoAssets: [],
     showEditAssetModal: false,
-    selectedAsset: new CryptoAsset('', '', '', ''),
+    selectedAsset: new CryptoAsset('', '', '', '', new Date(0)),
   };
 
   componentWillUnmount() {
@@ -24,9 +24,18 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
   }
 
   componentDidMount() {
-    ipcRenderer.on('list_crypto_assets', (_event: any, arg: CryptoAsset[]) => {
-      this.setState({cryptoAssets: arg});
-    });
+    ipcRenderer.on(
+      'list_crypto_assets',
+      (_event: any, arg: CryptoAssetDTO[]) => {
+        const assets: CryptoAsset[] = [];
+        if (arg && arg.length) {
+          for (const a of arg) {
+            assets.push(getCryptoAsset(a));
+          }
+        }
+        this.setState({cryptoAssets: assets});
+      },
+    );
     ipcRenderer.send('list_crypto_assets');
   }
 

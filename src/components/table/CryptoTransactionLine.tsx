@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {getFormattedDate} from '../../utils/DateConverter';
 import {CryptoTransaction} from '../models/cryptotransaction';
 import {getTransactionType, TransactionType} from '../models/transaction';
 
@@ -76,7 +77,9 @@ export class CryptoTransactionLine extends Component<
     return (
       <tr className="border-b border-gray-200 hover:bg-gray-100">
         <td className="py-3 px-6 whitespace-nowrap">
-          <span className="font-bold">{this.props.transaction.date + ''}</span>
+          <span className="font-bold">
+            {getFormattedDate(this.props.transaction.date)}
+          </span>
         </td>
         <td className="py-3 px-6 text-center">
           <span

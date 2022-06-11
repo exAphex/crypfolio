@@ -65,6 +65,7 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
       this.state.name,
       this.state.description,
       '',
+      new Date(0),
     );
     asset.dataProvider = new DataProvider(
       this.state.dataProviderID,

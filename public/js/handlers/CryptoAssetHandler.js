@@ -14,14 +14,14 @@ const listAssets = (event) => {
   event.reply('list_crypto_assets', assets);
 };
 
-const queryCryptoPriceHistory = (event, arg) => {
+const queryCryptoPriceHistory = async (event, arg) => {
   let assets = store.getSync('crypto_assets');
   if (!assets || !Array.isArray(assets)) {
     assets = [];
   }
   for (let i = 0; i < assets.length; i++) {
     if (assets[i].id === arg.id) {
-      assets[i] = softQueryPriceData(assets[i]);
+      assets[i] = await softQueryPriceData(assets[i]);
     }
   }
 
@@ -92,7 +92,7 @@ const toLowerCase = (str) => {
   }
 };
 
-const softQueryPriceData = (asset) => {
+const softQueryPriceData = async (asset) => {
   if (
     !asset.dataProvider.queryIdentifier ||
     asset.dataProvider.queryIdentifier === ''
@@ -107,7 +107,7 @@ const softQueryPriceData = (asset) => {
     });
     maxDate = sortedPrices[0].date;
   }
-  var queryData = CoinGeckoProvider.getCoinPricesBetween(
+  var queryData = await CoinGeckoProvider.getCoinPricesBetween(
     asset.dataProvider.queryIdentifier,
     maxDate,
     today.getTime(),
@@ -123,6 +123,9 @@ const mergePriceData = (prices, queriedPrices) => {
   var sortedPrices = queriedPrices.sort((l, u) => {
     return l.date > u.date ? 1 : -1;
   });
+  if (!prices) {
+    prices = [];
+  }
   for (var i = 0; i < sortedPrices.length; i++) {
     prices = CoinGeckoProvider.upsertTimeData(
       prices,

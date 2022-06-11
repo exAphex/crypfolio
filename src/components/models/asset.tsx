@@ -12,12 +12,13 @@ export class Asset {
     description: string,
     type: string,
     symbol: string,
+    latestUpdate: Date,
   ) {
     this.id = id;
     this.name = name;
     this.description = description;
     this.type = type;
     this.symbol = symbol;
-    this.latestUpdate = new Date(0);
+    this.latestUpdate = latestUpdate;
   }
 }

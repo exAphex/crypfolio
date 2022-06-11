@@ -10,3 +10,13 @@ export class CryptoAssetDTO extends AssetDTO {
     this.dataProvider = asset.dataProvider;
   }
 }
+
+export function getCryptoAsset(asset: CryptoAssetDTO): CryptoAsset {
+  return new CryptoAsset(
+    asset.id,
+    asset.name,
+    asset.description,
+    asset.symbol,
+    new Date(asset.latestUpdate),
+  );
+}
