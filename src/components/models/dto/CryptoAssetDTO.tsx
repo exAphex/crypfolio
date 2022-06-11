@@ -12,11 +12,13 @@ export class CryptoAssetDTO extends AssetDTO {
 }
 
 export function getCryptoAsset(asset: CryptoAssetDTO): CryptoAsset {
-  return new CryptoAsset(
+  const retAsset = new CryptoAsset(
     asset.id,
     asset.name,
     asset.description,
     asset.symbol,
     new Date(asset.latestUpdate),
   );
+  retAsset.dataProvider = asset.dataProvider;
+  return retAsset;
 }

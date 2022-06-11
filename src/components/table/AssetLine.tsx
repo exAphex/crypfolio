@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {getFormattedDate} from '../../utils/DateConverter';
 import {CryptoAsset} from '../models/CryptoAsset';
 
 type AssetLineProps = {
@@ -17,7 +18,7 @@ export class AssetLine extends Component<AssetLineProps, {}> {
     if (asset.latestUpdate <= new Date(1)) {
       return '-';
     }
-    return asset.latestUpdate + '';
+    return getFormattedDate(asset.latestUpdate);
   }
   render() {
     return (
