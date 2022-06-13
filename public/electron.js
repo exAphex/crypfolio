@@ -44,8 +44,8 @@ ipcMain.on('update_crypto_asset', (event, id) => {
   CryptoAssetHandler.updateAsset(event, id);
 });
 
-ipcMain.on('soft_query_crypto_asset', (event, id) => {
-  CryptoAssetHandler.queryCryptoPriceHistory(event, id);
+ipcMain.handle('soft_query_crypto_asset', (event, id) => {
+  return CryptoAssetHandler.queryCryptoPriceHistory(event, id);
 });
 
 ipcMain.on('get-version', (event, arg) => {

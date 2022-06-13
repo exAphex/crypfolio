@@ -26,3 +26,19 @@ export function lowerCase(data: string) {
     return data.toLowerCase();
   }
 }
+
+export function formatError(e: any) {
+  if (!e) {
+    return '';
+  }
+
+  if (e instanceof String) {
+    return e;
+  }
+
+  if (e.message) {
+    return e.message;
+  }
+
+  return 'Unkown error!';
+}

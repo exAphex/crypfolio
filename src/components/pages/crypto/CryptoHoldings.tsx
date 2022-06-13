@@ -2,10 +2,12 @@ import React, {Component} from 'react';
 import CryptoHoldingLine from '../../table/CryptoHoldingLine';
 import {getBalance} from '../../../utils/CryptoCalculator';
 import {CryptoTransaction} from '../../models/cryptotransaction';
-import {CryptoHolding} from '../../models/CryptoHolding';
+import {CryptoAsset} from '../../models/CryptoAsset';
+import {getAssetLatestPrice} from '../../../utils/PriceUtils';
 
 type CryptoHoldingsProps = {
   transactions: CryptoTransaction[];
+  assets: CryptoAsset[];
 };
 
 export class CryptoHoldings extends Component<CryptoHoldingsProps, {}> {
@@ -16,6 +18,7 @@ export class CryptoHoldings extends Component<CryptoHoldingsProps, {}> {
           <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
             <th className="py-3 px-6 text-left">Name</th>
             <th className="py-3 px-6 text-right">Amount</th>
+            <th className="py-3 px-6 text-right">Amount (Euro)</th>
           </tr>
         </thead>
         <tbody className="text-gray-600 text-sm ">
@@ -31,6 +34,7 @@ export class CryptoHoldings extends Component<CryptoHoldingsProps, {}> {
                 key={item.symbol}
                 amount={item.amount}
                 name={item.symbol}
+                price={getAssetLatestPrice(item.symbol, this.props.assets)}
               ></CryptoHoldingLine>
             ))}
         </tbody>

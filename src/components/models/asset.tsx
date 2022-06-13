@@ -1,3 +1,10 @@
+import {ErrorMessage} from './ErrorMessage';
+
+export type AssetPrice = {
+  date: Date;
+  value: number;
+};
+
 export class Asset {
   id: string;
   name: string;
@@ -5,6 +12,9 @@ export class Asset {
   type: string;
   symbol: string;
   latestUpdate: Date;
+  prices: AssetPrice[];
+  isError: boolean;
+  err: ErrorMessage;
 
   constructor(
     id: string,
@@ -20,5 +30,8 @@ export class Asset {
     this.type = type;
     this.symbol = symbol;
     this.latestUpdate = latestUpdate;
+    this.prices = [];
+    this.isError = false;
+    this.err = new ErrorMessage('', '');
   }
 }

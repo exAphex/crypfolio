@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Asset} from '../../models/asset';
 import {CryptoAsset} from '../../models/CryptoAsset';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
+import {ErrorMessage} from '../../models/ErrorMessage';
 import AssetLine from '../../table/AssetLine';
 import EditAssetModal from './EditAssetModal';
 const {ipcRenderer} = window.require('electron');
@@ -10,6 +11,8 @@ type AssetOverviewState = {
   cryptoAssets: CryptoAsset[];
   showEditAssetModal: boolean;
   selectedAsset: CryptoAsset;
+  isError: boolean;
+  errorMessage: ErrorMessage;
 };
 
 export class AssetOverview extends Component<{}, AssetOverviewState> {
@@ -17,6 +20,8 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
     cryptoAssets: [],
     showEditAssetModal: false,
     selectedAsset: new CryptoAsset('', '', '', '', new Date(0)),
+    isError: false,
+    errorMessage: new ErrorMessage('', null),
   };
 
   componentWillUnmount() {
@@ -36,6 +41,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
         this.setState({cryptoAssets: assets});
       },
     );
+
     ipcRenderer.send('list_crypto_assets');
   }
 
@@ -55,7 +61,29 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
   }
 
   onRefreshCryptoAsset(asset: CryptoAsset) {
-    ipcRenderer.send('soft_query_crypto_asset', new CryptoAssetDTO(asset));
+    ipcRenderer
+      .invoke('soft_query_crypto_asset', new CryptoAssetDTO(asset))
+      .then((retAssetDTO: CryptoAssetDTO) => {
+        const retAsset: CryptoAsset = getCryptoAsset(retAssetDTO);
+        for (const a of this.state.cryptoAssets) {
+          if (a.symbol === asset.symbol) {
+            a.isError = false;
+            a.prices = retAsset.prices;
+            a.latestUpdate = retAsset.latestUpdate;
+            break;
+          }
+        }
+        this.setState({cryptoAssets: this.state.cryptoAssets});
+      })
+      .catch((error: ErrorMessage) => {
+        for (const a of this.state.cryptoAssets) {
+          if (a.symbol === asset.symbol) {
+            a.isError = true;
+            break;
+          }
+        }
+        this.setState({cryptoAssets: this.state.cryptoAssets});
+      });
   }
 
   render() {
@@ -107,6 +135,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
                 <th className="py-3 px-6 text-left">Description</th>
                 <th className="py-3 px-6 text-left">Symbol</th>
                 <th className="py-3 px-6 text-left">Latest update</th>
+                <th className="py-3 px-6 text-right">Latest price (Euro)</th>
                 <th className="py-3 px-6 text-left"></th>
               </tr>
             </thead>
@@ -119,6 +148,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
                   <AssetLine
                     key={item.id}
                     asset={item}
+                    assets={this.state.cryptoAssets}
                     onDeleteAsset={(asset: Asset) => {}}
                     onEditAsset={(asset: CryptoAsset) => {
                       this.onEditCryptoAsset(asset);

@@ -22,11 +22,12 @@ const queryCryptoPriceHistory = async (event, arg) => {
   for (let i = 0; i < assets.length; i++) {
     if (assets[i].id === arg.id) {
       assets[i] = await softQueryPriceData(assets[i]);
+      store.set('crypto_assets', assets);
+      return assets[i];
     }
   }
 
-  store.set('crypto_assets', assets);
-  event.reply('list_crypto_assets', assets);
+  return null;
 };
 
 const addCryptoAssets = (event, arg) => {

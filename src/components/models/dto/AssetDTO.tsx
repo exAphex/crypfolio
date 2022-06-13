@@ -1,4 +1,4 @@
-import {Asset} from '../asset';
+import {Asset, AssetPrice} from '../asset';
 
 export class AssetDTO {
   id: string;
@@ -7,6 +7,7 @@ export class AssetDTO {
   type: string;
   symbol: string;
   latestUpdate: number;
+  prices: AssetPrice[];
 
   constructor(asset: Asset) {
     this.id = asset.id;
@@ -17,5 +18,6 @@ export class AssetDTO {
     this.latestUpdate = asset.latestUpdate.getTime
       ? asset.latestUpdate.getTime()
       : 0;
+    this.prices = asset.prices;
   }
 }

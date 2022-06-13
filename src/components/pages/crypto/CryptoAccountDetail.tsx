@@ -11,12 +11,14 @@ import CryptoHoldings from './CryptoHoldings';
 import {CryptoAsset} from '../../models/CryptoAsset';
 import {CryptoTransactionDTO} from '../../models/dto/CryptoTransactionDTO';
 import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
+import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
 type CryptoAccountDetailProps = {params: CryptoAccountDetailParams};
 type CryptoAccountDetailState = {
   account: CryptoAccount;
+  assets: CryptoAsset[];
   showImportCSVModal: boolean;
 };
 
@@ -35,12 +37,14 @@ export class CryptoAccountDetail extends Component<
 > {
   state = {
     account: new CryptoAccount('', '', '', {id: '', name: ''}, '', []),
+    assets: [],
     showImportCSVModal: false,
   };
   myRef = createRef();
 
   componentWillUnmount() {
     ipcRenderer.removeAllListeners('get_crypto_account');
+    ipcRenderer.removeAllListeners('list_crypto_assets');
   }
 
   componentDidMount() {
@@ -50,6 +54,19 @@ export class CryptoAccountDetail extends Component<
         this.setState({account: getAccount(arg)});
       },
     );
+    ipcRenderer.on(
+      'list_crypto_assets',
+      (_event: any, arg: CryptoAssetDTO[]) => {
+        const assets: CryptoAsset[] = [];
+        if (arg && arg.length) {
+          for (const a of arg) {
+            assets.push(getCryptoAsset(a));
+          }
+        }
+        this.setState({assets});
+      },
+    );
+    ipcRenderer.send('list_crypto_assets');
     ipcRenderer.send('get_crypto_account', this.props.params.id);
   }
 
@@ -148,6 +165,7 @@ export class CryptoAccountDetail extends Component<
         <div className="pt-4 pb-4">
           <CryptoHoldings
             transactions={this.state.account.transactions}
+            assets={this.state.assets}
           ></CryptoHoldings>
         </div>
 

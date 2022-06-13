@@ -20,5 +20,6 @@ export function getCryptoAsset(asset: CryptoAssetDTO): CryptoAsset {
     new Date(asset.latestUpdate),
   );
   retAsset.dataProvider = asset.dataProvider;
+  retAsset.prices = asset.prices;
   return retAsset;
 }

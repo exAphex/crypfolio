@@ -1,9 +1,12 @@
 import React, {Component} from 'react';
 import {getFormattedDate} from '../../utils/DateConverter';
+import {getAssetLatestPrice, toEuro} from '../../utils/PriceUtils';
+import {formatError} from '../../utils/utils';
 import {CryptoAsset} from '../models/CryptoAsset';
 
 type AssetLineProps = {
   asset: CryptoAsset;
+  assets: CryptoAsset[];
   onRefreshAsset: (acc: CryptoAsset) => void;
   onHardRefreshAsset: (acc: CryptoAsset) => void;
   onEditAsset: (acc: CryptoAsset) => void;
@@ -21,6 +24,10 @@ export class AssetLine extends Component<AssetLineProps, {}> {
     return getFormattedDate(asset.latestUpdate);
   }
   render() {
+    const latestPrice = getAssetLatestPrice(
+      this.props.asset.symbol,
+      this.props.assets,
+    );
     return (
       <tr className="border-b border-gray-200 hover:bg-gray-100">
         <td className="py-3 px-6 whitespace-nowrap">
@@ -37,6 +44,7 @@ export class AssetLine extends Component<AssetLineProps, {}> {
                 stroke="orange"
                 strokeWidth={2}
               >
+                <title>No data provider id defined!</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -47,6 +55,25 @@ export class AssetLine extends Component<AssetLineProps, {}> {
               <></>
             )}
 
+            {this.props.asset.isError ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="red"
+                strokeWidth={2}
+              >
+                <title>{formatError(this.props.asset.err)}</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            ) : (
+              <></>
+            )}
             <span className="font-bold pl-2">{this.props.asset.name}</span>
           </div>
         </td>
@@ -61,6 +88,9 @@ export class AssetLine extends Component<AssetLineProps, {}> {
         </td>
         <td className="py-3 px-6 text-left">
           <span>{this.formatLastUpdate(this.props.asset)}</span>
+        </td>
+        <td className="py-3 px-6 text-right">
+          <span>{latestPrice > 0 ? toEuro(latestPrice) : '-'}</span>
         </td>
         <td className="py-3 px-6 text-center">
           <div className="flex item-center justify-end">
