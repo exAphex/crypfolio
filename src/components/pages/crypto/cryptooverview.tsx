@@ -4,6 +4,10 @@ import AddCryptoAccount from './AddCryptoAccount';
 import 'react-datepicker/dist/react-datepicker.css';
 import {CryptoAccount} from '../../models/cryptoaccount';
 import CryptoAccountLine from '../../table/CryptoAccountLine';
+import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
+import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
+import {CryptoAsset} from '../../models/CryptoAsset';
+import {CryptoTransaction} from '../../models/cryptotransaction';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoOverviewState = {
@@ -85,6 +89,42 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     ipcRenderer.send('delete_crypto_account', acc);
   }
 
+  onGenerateTaxReport() {
+    const accounts: CryptoAccount[] = [];
+    const assets: CryptoAsset[] = [];
+    ipcRenderer
+      .invoke('i_list_crypto_accounts')
+      .then((accs: CryptoAccountDTO[]) => {
+        for (const a of accs) {
+          accounts.push(getAccount(a));
+        }
+        return ipcRenderer.invoke('i_list_crypto_assets');
+      })
+      .then((ass: CryptoAssetDTO[]) => {
+        for (const a of ass) {
+          assets.push(getCryptoAsset(a));
+        }
+        this.calculateTaxReport(accounts, assets);
+      });
+  }
+
+  extractTransactions(accounts: CryptoAccount[]): CryptoTransaction[] {
+    const transactions: CryptoTransaction[] = [];
+    for (const a of accounts) {
+      if (a.transactions && a.transactions.length > 0) {
+        for (const t of a.transactions) {
+          transactions.push(t);
+        }
+      }
+    }
+    return transactions;
+  }
+
+  calculateTaxReport(accounts: CryptoAccount[], assets: CryptoAsset[]) {
+    const transactions = this.extractTransactions(accounts);
+    console.log(transactions);
+  }
+
   render() {
     return (
       <div className="h-full flex flex-col">
@@ -117,6 +157,31 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
                     />
                   </svg>
                   <span className="hidden md:block ml-2">Add Account</span>
+                </button>
+              </div>
+              <div className="shadow rounded-lg flex mr-2">
+                <button
+                  onClick={() => this.onGenerateTaxReport()}
+                  type="button"
+                  className="rounded-lg inline-flex items-center bg-white hover:text-purple-500 focus:outline-none focus:shadow-outline text-gray-500 font-semibold py-2 px-2 md:px-4"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z"
+                    />
+                  </svg>
+                  <span className="hidden md:block ml-2">
+                    Generate Tax report
+                  </span>
                 </button>
               </div>
             </div>

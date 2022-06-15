@@ -11,7 +11,7 @@ const listAssets = (event) => {
       assets[i].latestUpdate = new Date(assets[i].latestUpdate);
     }
   }
-  event.reply('list_crypto_assets', assets);
+  return assets;
 };
 
 const getAsset = (event, id) => {

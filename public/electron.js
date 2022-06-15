@@ -9,7 +9,8 @@ const CryptoAccountHandler = require('./js/handlers/CryptoAccountHandler.js');
 const CryptoAssetHandler = require('./js/handlers/CryptoAssetHandler.js');
 
 ipcMain.on('list_crypto_accounts', (event, arg) => {
-  CryptoAccountHandler.listAccounts(event);
+  const accounts = CryptoAccountHandler.listAccounts(event);
+  event.reply('list_crypto_accounts', accounts);
 });
 
 ipcMain.on('add_crypto_account', (event, arg) => {
@@ -33,7 +34,8 @@ ipcMain.on('get_crypto_account', (event, id) => {
 });
 
 ipcMain.on('list_crypto_assets', (event, arg) => {
-  CryptoAssetHandler.listAssets(event);
+  const assets = CryptoAssetHandler.listAssets(event);
+  event.reply('list_crypto_assets', assets);
 });
 
 ipcMain.on('add_crypto_assets', (event, id) => {
@@ -57,6 +59,14 @@ ipcMain.handle('soft_query_crypto_asset', (event, id) => {
       error: e,
     };
   }
+});
+
+ipcMain.handle('i_list_crypto_assets', (event) => {
+  return CryptoAssetHandler.listAssets(event);
+});
+
+ipcMain.handle('i_list_crypto_accounts', (event) => {
+  return CryptoAccountHandler.listAccounts(event);
 });
 
 ipcMain.on('get-version', (event, arg) => {

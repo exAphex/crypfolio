@@ -5,7 +5,7 @@ const listAccounts = (event) => {
   if (!accounts || !Array.isArray(accounts)) {
     accounts = [];
   }
-  event.reply('list_crypto_accounts', accounts);
+  return accounts;
 };
 
 const getAccount = (event, id) => {
