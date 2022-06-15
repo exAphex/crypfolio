@@ -6,8 +6,10 @@ import {CryptoAccount} from '../../models/cryptoaccount';
 import CryptoAccountLine from '../../table/CryptoAccountLine';
 import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
-import {CryptoAsset} from '../../models/CryptoAsset';
+import {CryptoAsset, getCryptoAssetFromSymbol} from '../../models/CryptoAsset';
 import {CryptoTransaction} from '../../models/cryptotransaction';
+import {TaxReport} from '../../models/taxreport/TaxReport';
+import {TransactionType} from '../../models/transaction';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoOverviewState = {
@@ -104,7 +106,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
         for (const a of ass) {
           assets.push(getCryptoAsset(a));
         }
-        this.calculateTaxReport(accounts, assets);
+        this.calculateTaxReport(2022, accounts, assets);
       });
   }
 
@@ -120,9 +122,39 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     return transactions;
   }
 
-  calculateTaxReport(accounts: CryptoAccount[], assets: CryptoAsset[]) {
-    const transactions = this.extractTransactions(accounts);
-    console.log(transactions);
+  calculateTaxReport(
+    year: number,
+    accounts: CryptoAccount[],
+    assets: CryptoAsset[],
+  ) {
+    const taxReport: TaxReport = new TaxReport(year);
+    //const transactions = this.extractTransactions(accounts);
+    for (const a of accounts) {
+      if (!a.transactions) {
+        continue;
+      }
+      for (const t of a.transactions) {
+        const tempAsset = getCryptoAssetFromSymbol(t.symbol, assets);
+        if (!tempAsset) {
+          throw new Error('Could not find asset with symbol: ' + t.symbol);
+        }
+        switch (t.type) {
+          case TransactionType.STAKING_REWARD:
+            taxReport.addIncome(a, t, tempAsset);
+        }
+      }
+    }
+
+    console.log(taxReport);
+    this.printTaxReport(taxReport);
+  }
+
+  printTaxReport(taxReport: TaxReport) {
+    let total: number = 0;
+    for (const i of taxReport.taxableIncome) {
+      total += i.amount * i.price;
+    }
+    console.log(total);
   }
 
   render() {

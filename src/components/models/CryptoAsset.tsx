@@ -15,3 +15,22 @@ export class CryptoAsset extends Asset {
     this.dataProvider = new DataProvider('COINGECKO', 'Coingecko', '');
   }
 }
+
+export function getCryptoAssetFromSymbol(
+  symbol: string,
+  assets: CryptoAsset[],
+): CryptoAsset | null {
+  if (!assets || !symbol) {
+    return null;
+  }
+
+  for (const a of assets) {
+    if (!a.symbol) {
+      continue;
+    }
+    if (a.symbol.toLowerCase() === symbol.toLowerCase()) {
+      return a;
+    }
+  }
+  return null;
+}
