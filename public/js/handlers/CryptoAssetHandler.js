@@ -14,6 +14,21 @@ const listAssets = (event) => {
   event.reply('list_crypto_assets', assets);
 };
 
+const getAsset = (event, id) => {
+  let assets = store.getSync('crypto_assets');
+  let retAsset = null;
+  if (!assets || !Array.isArray(assets)) {
+    assets = [];
+  }
+  for (let i = 0; i < assets.length; i++) {
+    if (assets[i].id === id) {
+      retAsset = assets[i];
+      break;
+    }
+  }
+  event.reply('get_crypto_asset', retAsset);
+};
+
 const queryCryptoPriceHistory = async (event, arg) => {
   let assets = store.getSync('crypto_assets');
   if (!assets || !Array.isArray(assets)) {
@@ -141,3 +156,4 @@ exports.queryCryptoPriceHistory = queryCryptoPriceHistory;
 exports.addCryptoAssets = addCryptoAssets;
 exports.listAssets = listAssets;
 exports.updateAsset = updateAsset;
+exports.getAsset = getAsset;

@@ -9,9 +9,9 @@ const getCoinPricesBetween = async (coinId, from, to, currency) => {
       '/market_chart/range?vs_currency=' +
       currency +
       '&from=' +
-      from +
+      from / 1000 +
       '&to=' +
-      to,
+      to / 1000,
     {
       method: 'GET',
       headers: {

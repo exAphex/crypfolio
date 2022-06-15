@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {Link} from 'react-router-dom';
 import {getFormattedDate} from '../../utils/DateConverter';
 import {getAssetLatestPrice, toEuro} from '../../utils/PriceUtils';
 import {formatError} from '../../utils/utils';
@@ -74,7 +75,13 @@ export class AssetLine extends Component<AssetLineProps, {}> {
             ) : (
               <></>
             )}
-            <span className="font-bold pl-2">{this.props.asset.name}</span>
+            <Link
+              className={'font-medium'}
+              to={'/cryptoasset/' + this.props.asset.id}
+            >
+              <span className="font-bold">{this.props.asset.name}</span>
+            </Link>
+            <span className="font-bold pl-2"></span>
           </div>
         </td>
         <td className="py-3 px-6 text-left">

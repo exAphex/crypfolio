@@ -44,8 +44,19 @@ ipcMain.on('update_crypto_asset', (event, id) => {
   CryptoAssetHandler.updateAsset(event, id);
 });
 
+ipcMain.on('get_crypto_asset', (event, id) => {
+  CryptoAssetHandler.getAsset(event, id);
+});
+
 ipcMain.handle('soft_query_crypto_asset', (event, id) => {
-  return CryptoAssetHandler.queryCryptoPriceHistory(event, id);
+  try {
+    return CryptoAssetHandler.queryCryptoPriceHistory(event, id);
+  } catch (e) {
+    throw {
+      messsage: 'Generic error',
+      error: e,
+    };
+  }
 });
 
 ipcMain.on('get-version', (event, arg) => {

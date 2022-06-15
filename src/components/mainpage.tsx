@@ -5,6 +5,7 @@ import CryptoOverview from './pages/crypto/CryptoOverview';
 import InfoOverview from './pages/info';
 import CryptoAccountDetail from './pages/crypto/CryptoAccountDetail';
 import AssetOverview from './pages/asset/AssetOverview';
+import CryptoAssetDetail from './pages/asset/CryptoAssetDetail';
 
 type MainPageState = {selectedNavItem: string};
 
@@ -204,6 +205,7 @@ export class MainPage extends Component<{}, MainPageState> {
                 path="/cryptodetail/:id"
                 element={<CryptoAccountDetail />}
               />
+              <Route path="/cryptoasset/:id" element={<CryptoAssetDetail />} />
             </Routes>
           </div>
         </div>
