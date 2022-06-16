@@ -10,6 +10,7 @@ import {CryptoAsset, getCryptoAssetFromSymbol} from '../../models/CryptoAsset';
 import {CryptoTransaction} from '../../models/cryptotransaction';
 import {TaxReport} from '../../models/taxreport/TaxReport';
 import {TransactionType} from '../../models/transaction';
+import {printTaxReport} from '../../../utils/TaxReportPrinter';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoOverviewState = {
@@ -141,6 +142,9 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
         switch (t.type) {
           case TransactionType.STAKING_REWARD:
             taxReport.addIncome(a, t, tempAsset);
+            break;
+          case TransactionType.DISTRIBUTION:
+            taxReport.addIncome(a, t, tempAsset);
         }
       }
     }
@@ -154,7 +158,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     for (const i of taxReport.taxableIncome) {
       total += i.amount * i.price;
     }
-    console.log(total);
+    printTaxReport(taxReport);
   }
 
   render() {
