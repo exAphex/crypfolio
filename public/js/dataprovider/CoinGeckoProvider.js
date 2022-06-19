@@ -1,17 +1,20 @@
 const fetch = require('node-fetch');
 const priceAPI = 'https://api.coingecko.com/api/v3/coins/';
+const moment = require('moment');
 
 const getCoinPricesBetween = async (coinId, from, to, currency) => {
   let retData = [];
+  const startDate = moment(from);
+  const endDate = moment(to);
+  const days = Math.abs(startDate.diff(endDate, 'days')) + 1;
   const responsePrice = await fetch(
     priceAPI +
       coinId +
-      '/market_chart/range?vs_currency=' +
+      '/market_chart?vs_currency=' +
       currency +
-      '&from=' +
-      from / 1000 +
-      '&to=' +
-      to / 1000,
+      '&days=' +
+      days +
+      '&interval=daily',
     {
       method: 'GET',
       headers: {
