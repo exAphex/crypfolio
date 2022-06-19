@@ -35,7 +35,7 @@ export function printTaxReport(report: TaxReport) {
     willDrawCell(data) {
       const rows = data.table.body;
       if (data.row.index === rows.length - 1) {
-        doc.setFillColor(239, 154, 154);
+        doc.setFillColor(0, 0, 0);
         doc.setTextColor(255, 255, 255);
       }
     },
