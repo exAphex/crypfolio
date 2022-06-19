@@ -36,9 +36,11 @@ export class CryptoAssetDetail extends Component<
         <div className="flex items-center justify-center h-14 border-b font-bold text-4xl">
           <div>{this.state.asset.name}</div>
         </div>
-        <HistoricCryptoAssetLineChart
-          asset={this.state.asset}
-        ></HistoricCryptoAssetLineChart>
+        <div className="p-6">
+          <HistoricCryptoAssetLineChart
+            asset={this.state.asset}
+          ></HistoricCryptoAssetLineChart>
+        </div>
       </div>
     );
   }
