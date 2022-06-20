@@ -63,7 +63,22 @@ const addAccountTransactions = (event, arg) => {
 
   for (let i = 0; i < accounts.length; i++) {
     if (accounts[i].id === arg.id) {
-      accounts[i].transactions = arg.transactions;
+      if (!accounts[i].transactions) {
+        accounts[i].transactions = [];
+      }
+      if (!arg.transactions) {
+        arg.transactions = [];
+      }
+      for (let j = 0; j < arg.transactions.length; j++) {
+        if (
+          !checkDuplicateTransaction(
+            accounts[i].transactions,
+            arg.transactions[j],
+          )
+        ) {
+          accounts[i].transactions.push(arg.transactions[j]);
+        }
+      }
       retAcc = accounts[i];
       break;
     }
@@ -88,6 +103,15 @@ const deleteAccount = (event, arg) => {
 
   store.set('crypto_accounts', accounts);
   event.reply('list_crypto_accounts', accounts);
+};
+
+const checkDuplicateTransaction = (transactions, t) => {
+  for (let i = 0; i < transactions.length; i++) {
+    if (transactions[i].id === t.id) {
+      return true;
+    }
+  }
+  return false;
 };
 
 exports.listAccounts = listAccounts;
