@@ -1,3 +1,4 @@
+import {CryptoAccount} from '../components/models/cryptoaccount';
 import {CryptoHolding} from '../components/models/CryptoHolding';
 import {CryptoTransaction} from '../components/models/cryptotransaction';
 import {TransactionType} from '../components/models/transaction';
@@ -51,7 +52,21 @@ function addHolding(
     }
   }
   if (!foundHolding) {
-    holdings.push(new CryptoHolding(transaction.symbol, transaction.amount));
+    holdings.push(new CryptoHolding(transaction.symbol, transaction.amount, 0));
   }
   return holdings;
+}
+
+export function extractTransactions(
+  accounts: CryptoAccount[],
+): CryptoTransaction[] {
+  const transactions: CryptoTransaction[] = [];
+  for (const a of accounts) {
+    if (a.transactions && a.transactions.length > 0) {
+      for (const t of a.transactions) {
+        transactions.push(t);
+      }
+    }
+  }
+  return transactions;
 }
