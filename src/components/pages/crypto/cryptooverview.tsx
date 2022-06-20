@@ -154,10 +154,10 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   }
 
   printTaxReport(taxReport: TaxReport) {
-    let total: number = 0;
-    for (const i of taxReport.taxableIncome) {
-      total += i.amount * i.price;
-    }
+    //let total: number = 0;
+    // of taxReport.taxableIncome) {
+      //total += i.amount * i.price;
+    //}
     printTaxReport(taxReport);
   }
 
