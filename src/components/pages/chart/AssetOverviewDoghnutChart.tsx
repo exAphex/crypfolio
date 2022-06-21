@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import moment from 'moment';
 import 'chartjs-adapter-moment';
 import {Doughnut} from 'react-chartjs-2';
 import {CryptoAsset} from '../../models/CryptoAsset';
@@ -25,15 +24,15 @@ export class AssetOverviewDoghnutChart extends Component<
         tooltip: {
           callbacks: {
             label: (context: any) => {
-              let lbl =
+              return (
                 context.label +
                 ' ' +
                 context.raw.toLocaleString('de-DE', {
                   style: 'currency',
                   currency: 'EUR',
                   minimumFractionDigits: 2,
-                });
-              return lbl;
+                })
+              );
             },
           },
         },

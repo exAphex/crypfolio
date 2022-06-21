@@ -129,7 +129,6 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     assets: CryptoAsset[],
   ) {
     const taxReport: TaxReport = new TaxReport(year);
-    //const transactions = this.extractTransactions(accounts);
     for (const a of accounts) {
       if (!a.transactions) {
         continue;
@@ -149,15 +148,10 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
       }
     }
 
-    console.log(taxReport);
     this.printTaxReport(taxReport);
   }
 
   printTaxReport(taxReport: TaxReport) {
-    //let total: number = 0;
-    // of taxReport.taxableIncome) {
-      //total += i.amount * i.price;
-    //}
     printTaxReport(taxReport);
   }
 
