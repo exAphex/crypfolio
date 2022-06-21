@@ -52,7 +52,7 @@ export class KrakenCSVImporter {
         new CryptoTransaction(
           line[0],
           getDateFromString(line[2]),
-          getTransactionType(line[3], Number(line[7]),line[6]),
+          getTransactionType(line[3], Number(line[7])),
           Number(line[7]),
           parseSymbol(line[6]),
         ),
@@ -79,6 +79,23 @@ function getDateFromString(date: string): Date {
   return moment(date).toDate();
 }
 
+function fixKrakenSymbol(symbol: string) {
+  switch (symbol) {
+    case "XXBT":
+      return "BTC";
+    case "XXRP":
+      return "XRP";
+    case "LUNA2":
+      return "LUNA";
+    case "LUNA":
+      return "LUNC";
+    case "ZEUR":
+      return "EUR";
+    default:
+      return symbol;
+  }
+}
+
 function parseSymbol(symbol: string) : string {
   if (!symbol) {
     return "";
@@ -86,23 +103,25 @@ function parseSymbol(symbol: string) : string {
 
   symbol = symbol.toUpperCase();
 
+  // mismatch of Kraken symbols
+  
+
   if (symbol.length < 2) {
-    return symbol;
+    return fixKrakenSymbol(symbol);
   }
 
   let possibleSuffix = symbol.slice(-2);
 
   if (possibleSuffix === '.S') {
-    return symbol.slice(0, -2);
+    return fixKrakenSymbol(symbol.slice(0, -2));
   } else {
-    return symbol;
+    return fixKrakenSymbol(symbol);
   }
 }
 
 function getTransactionType(
   data: string,
-  amount: number,
-  symbol: string
+  amount: number
 ): TransactionType {
   switch (data) {
     case 'staking': {
