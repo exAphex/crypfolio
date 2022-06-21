@@ -12,6 +12,7 @@ import {CryptoAsset} from '../../models/CryptoAsset';
 import {CryptoTransactionDTO} from '../../models/dto/CryptoTransactionDTO';
 import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
+import { KrakenCSVImporter } from '../../../parser/KrakenCSVImporter';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
@@ -78,9 +79,21 @@ export class CryptoAccountDetail extends Component<
     this.setState({showImportCSVModal: false});
   }
 
+  parseCSVArray(data: string[][]) : CryptoTransaction[] {
+    switch (this.state.account.type.id) {
+      case 'BINANCE':
+        return parseCSVArray(data);
+      case 'KRAKEN':
+        let krakenImporter = new KrakenCSVImporter(data);
+        return krakenImporter.transactions;
+      default:
+        return [];
+    }
+  }
+
   onImportedFile(data: string[][]) {
     this.onCloseCSVModal();
-    const transactions: CryptoTransaction[] = parseCSVArray(data);
+    const transactions: CryptoTransaction[] = this.parseCSVArray(data);
     const candidateTransactions: CryptoTransactionDTO[] = [];
     for (const t of transactions) {
       if (t.type === TransactionType.UNKNOWN || lowerCase(t.symbol) === 'eur') {
