@@ -52,7 +52,7 @@ export class HomePage extends Component<{}, HomePageState> {
         <div className="flex items-center justify-center h-14 border-b font-bold text-4xl">
           <div>Home</div>
         </div>
-        <div className="flex items-center justify-center border-b">
+        <div className="flex justify-center h-2">
           <AssetOverviewDoghnutChart
             assets={this.state.assets}
             accounts={this.state.accounts}
