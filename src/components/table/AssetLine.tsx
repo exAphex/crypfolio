@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import LoadingSpin from 'react-loading-spin';
 import {Link} from 'react-router-dom';
 import {getFormattedDate} from '../../utils/DateConverter';
 import {getAssetLatestPrice, toEuro} from '../../utils/PriceUtils';
@@ -12,6 +13,7 @@ type AssetLineProps = {
   onHardRefreshAsset: (acc: CryptoAsset) => void;
   onEditAsset: (acc: CryptoAsset) => void;
   onDeleteAsset: (acc: CryptoAsset) => void;
+  isLoading: boolean;
 };
 
 export class AssetLine extends Component<AssetLineProps, {}> {
@@ -75,6 +77,7 @@ export class AssetLine extends Component<AssetLineProps, {}> {
             ) : (
               <></>
             )}
+            {this.props.isLoading ? <LoadingSpin size="24px" /> : null}
             <Link
               className={'font-medium'}
               to={'/cryptoasset/' + this.props.asset.id}
@@ -112,6 +115,7 @@ export class AssetLine extends Component<AssetLineProps, {}> {
                 stroke="currentColor"
                 strokeWidth="2"
               >
+                <title>Refresh</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -130,6 +134,7 @@ export class AssetLine extends Component<AssetLineProps, {}> {
                 stroke="currentColor"
                 strokeWidth="2"
               >
+                <title>Hard refresh</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

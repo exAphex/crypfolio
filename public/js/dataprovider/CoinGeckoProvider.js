@@ -37,6 +37,8 @@ const getCoinPricesBetween = async (coinId, from, to, currency) => {
       tempDate.setMilliseconds(0);
       retData = upsertTimeData(retData, tempDate.getTime(), sortedPrices[i][1]);
     }
+  } else {
+    throw 'Error on data: ' + JSON.stringify(jsonPrice);
   }
   return retData;
 };

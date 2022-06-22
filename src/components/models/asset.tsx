@@ -15,6 +15,7 @@ export class Asset {
   prices: AssetPrice[];
   isError: boolean;
   err: ErrorMessage;
+  isLoading: boolean;
 
   constructor(
     id: string,
@@ -33,6 +34,7 @@ export class Asset {
     this.prices = [];
     this.isError = false;
     this.err = new ErrorMessage('', '');
+    this.isLoading = false;
   }
 
   getPrice(targetDate: Date): number {

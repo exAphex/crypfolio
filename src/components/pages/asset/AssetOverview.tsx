@@ -45,7 +45,41 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
     ipcRenderer.send('list_crypto_assets');
   }
 
-  onRefreshAllAssets() {}
+  onRefreshAllAssets() {
+    for (const asset of this.state.cryptoAssets) {
+      asset.isError = false;
+      asset.isLoading = true;
+      this.setState({cryptoAssets: this.state.cryptoAssets});
+
+      ipcRenderer
+        .invoke('soft_query_crypto_asset', new CryptoAssetDTO(asset))
+        .then((retAssetDTO: CryptoAssetDTO) => {
+          const retAsset: CryptoAsset = getCryptoAsset(retAssetDTO);
+          for (const a of this.state.cryptoAssets) {
+            if (a.symbol === asset.symbol) {
+              a.isError = false;
+              a.prices = retAsset.prices;
+              a.latestUpdate = retAsset.latestUpdate;
+              a.isLoading = false;
+              break;
+            }
+          }
+          this.setState({cryptoAssets: this.state.cryptoAssets});
+        })
+        .catch((error: ErrorMessage) => {
+          for (const a of this.state.cryptoAssets) {
+            if (a.symbol === asset.symbol) {
+              a.isError = true;
+              a.isLoading = false;
+              a.err.e = error.e;
+              a.err.message = error.message;
+              break;
+            }
+          }
+          this.setState({cryptoAssets: this.state.cryptoAssets});
+        });
+    }
+  }
 
   onUpdateCryptoAsset(asset: CryptoAsset) {
     ipcRenderer.send('update_crypto_asset', new CryptoAssetDTO(asset));
@@ -61,6 +95,15 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
   }
 
   onRefreshCryptoAsset(asset: CryptoAsset) {
+    for (const a of this.state.cryptoAssets) {
+      if (a.symbol === asset.symbol) {
+        a.isError = false;
+        a.isLoading = true;
+        break;
+      }
+    }
+    this.setState({cryptoAssets: this.state.cryptoAssets});
+
     ipcRenderer
       .invoke('soft_query_crypto_asset', new CryptoAssetDTO(asset))
       .then((retAssetDTO: CryptoAssetDTO) => {
@@ -70,6 +113,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
             a.isError = false;
             a.prices = retAsset.prices;
             a.latestUpdate = retAsset.latestUpdate;
+            a.isLoading = false;
             break;
           }
         }
@@ -79,6 +123,9 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
         for (const a of this.state.cryptoAssets) {
           if (a.symbol === asset.symbol) {
             a.isError = true;
+            a.isLoading = false;
+            a.err.e = error.e;
+            a.err.message = error.message;
             break;
           }
         }
@@ -157,6 +204,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
                     onRefreshAsset={(asset: CryptoAsset) =>
                       this.onRefreshCryptoAsset(asset)
                     }
+                    isLoading={item.isLoading}
                   ></AssetLine>
                 ))}
             </tbody>
