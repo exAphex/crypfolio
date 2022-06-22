@@ -1,5 +1,9 @@
-const store = require('electron-json-storage');
+const Bluebird = require('bluebird');
+const store = Bluebird.promisifyAll(require('electron-json-storage'));
+const {resolve} = require('path');
 const CoinGeckoProvider = require('../dataprovider/CoinGeckoProvider');
+var Mutex = require('async-mutex').Mutex;
+const mutex = new Mutex();
 
 const listAssets = (event) => {
   let assets = store.getSync('crypto_assets');
@@ -30,19 +34,21 @@ const getAsset = (event, id) => {
 };
 
 const queryCryptoPriceHistory = async (event, arg) => {
-  let assets = store.getSync('crypto_assets');
-  if (!assets || !Array.isArray(assets)) {
-    assets = [];
-  }
-  for (let i = 0; i < assets.length; i++) {
-    if (assets[i].id === arg.id) {
-      assets[i] = await softQueryPriceData(assets[i]);
-      store.set('crypto_assets', assets);
-      return assets[i];
+  var l = await mutex.runExclusive(async () => {
+    let assets = store.getSync('crypto_assets');
+    if (!assets || !Array.isArray(assets)) {
+      assets = [];
     }
-  }
-
-  return null;
+    for (let i = 0; i < assets.length; i++) {
+      if (assets[i].id === arg.id) {
+        assets[i] = await softQueryPriceData(assets[i]);
+        await store.setAsync('crypto_assets', assets);
+        return assets[i];
+      }
+    }
+    return null;
+  });
+  return l;
 };
 
 const addCryptoAssets = (event, arg) => {
