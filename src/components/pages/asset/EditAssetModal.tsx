@@ -5,6 +5,7 @@ import {
   getAvailableProvider,
   getDataProviderNameById,
 } from '../../models/DataProvider';
+import {CoinGeckoCoin} from '../../models/dataprovider/CoinGeckoCoin';
 
 type EditAssetState = {
   id: string;
@@ -14,12 +15,15 @@ type EditAssetState = {
   availableDataProviders: DataProvider[];
   dataProviderID: string;
   dataProviderIdentifier: string;
+  dataProviderSymbol: string;
+  suggestedCoins: CoinGeckoCoin[];
 };
 
 type EditAssetProps = {
   asset: CryptoAsset;
   onUpdateCryptoAsset: (asset: CryptoAsset) => void;
   onCloseModal: () => void;
+  coinList: CoinGeckoCoin[];
 };
 
 export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
@@ -28,9 +32,11 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
     name: '',
     description: '',
     type: '',
+    dataProviderSymbol: '',
     availableDataProviders: getAvailableProvider(),
     dataProviderID: 'COINGECKO',
     dataProviderIdentifier: '',
+    suggestedCoins: [],
   };
 
   componentDidMount() {
@@ -57,6 +63,25 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
 
   updateAssetIdentifierValue(evt: React.ChangeEvent<HTMLInputElement>) {
     this.setState({dataProviderIdentifier: evt.target.value});
+  }
+
+  updateDataProviderSymbol(evt: React.ChangeEvent<HTMLInputElement>) {
+    const searchValue = evt.target.value;
+    const suggestions = [];
+    if (searchValue && searchValue !== '') {
+      for (const c of this.props.coinList) {
+        if (
+          c.id.toLowerCase().startsWith(searchValue.toLowerCase()) ||
+          c.symbol.toLowerCase().startsWith(searchValue.toLowerCase()) ||
+          c.name.toLowerCase().startsWith(searchValue.toLowerCase())
+        ) {
+          suggestions.push(c);
+        }
+      }
+      this.setState({suggestedCoins: suggestions});
+    }
+
+    this.setState({dataProviderSymbol: evt.target.value});
   }
 
   onSaveAsset() {
@@ -174,6 +199,56 @@ export class EditAssetModal extends Component<EditAssetProps, EditAssetState> {
                             ))}
                         </select>
                       </div>
+                    </div>
+                    <div className="inline-flex flex-col justify-center relative w-full text-gray-500">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          className="p-2 pl-8 rounded border border-gray-200 w-full bg-gray-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:border-transparent"
+                          placeholder="Search for symbol..."
+                          value={this.state.dataProviderSymbol}
+                          onChange={(evt) => this.updateDataProviderSymbol(evt)}
+                        />
+                        <svg
+                          className="w-4 h-4 absolute left-2.5 top-3.5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                          />
+                        </svg>
+                      </div>
+
+                      <ul className="bg-white border border-gray-100 w-full mt-2 overflow-y-auto">
+                        {this.state.suggestedCoins
+                          .sort((l, u) => {
+                            return l.name > u.name ? 1 : -1;
+                          })
+                          .slice(0, 5)
+                          .map((item) => (
+                            <li className="pl-8 pr-2 py-1 border-b-2 border-gray-100 relative cursor-pointer hover:bg-yellow-50 hover:text-gray-900">
+                              <svg
+                                className="absolute w-4 h-4 left-2 top-2"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                              >
+                                <path
+                                  fill-rule="evenodd"
+                                  d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z"
+                                  clip-rule="evenodd"
+                                />
+                              </svg>
+                              {item.name + '(' + item.symbol + ')'}
+                            </li>
+                          ))}
+                      </ul>
                     </div>
                     <div className="mb-1 w-full flex-col mt-3">
                       <label className="font-medium text-gray-800 py-2">

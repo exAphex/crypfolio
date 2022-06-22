@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Asset} from '../../models/asset';
 import {CryptoAsset} from '../../models/CryptoAsset';
+import {CoinGeckoCoin} from '../../models/dataprovider/CoinGeckoCoin';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
 import {ErrorMessage} from '../../models/ErrorMessage';
 import AssetLine from '../../table/AssetLine';
@@ -13,6 +14,7 @@ type AssetOverviewState = {
   selectedAsset: CryptoAsset;
   isError: boolean;
   errorMessage: ErrorMessage;
+  candidates: CoinGeckoCoin[];
 };
 
 export class AssetOverview extends Component<{}, AssetOverviewState> {
@@ -22,6 +24,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
     selectedAsset: new CryptoAsset('', '', '', '', new Date(0)),
     isError: false,
     errorMessage: new ErrorMessage('', null),
+    candidates: [],
   };
 
   componentWillUnmount() {
@@ -43,6 +46,11 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
     );
 
     ipcRenderer.send('list_crypto_assets');
+    ipcRenderer
+      .invoke('i_list_crypto_candidates')
+      .then((coins: CoinGeckoCoin[]) => {
+        this.setState({candidates: coins});
+      });
   }
 
   onRefreshAllAssets() {
@@ -217,6 +225,7 @@ export class AssetOverview extends Component<{}, AssetOverviewState> {
               this.onUpdateCryptoAsset(asset)
             }
             onCloseModal={() => this.onCloseModal()}
+            coinList={this.state.candidates}
           ></EditAssetModal>
         ) : null}
       </div>
