@@ -11,10 +11,18 @@ type AssetOverviewDoghnutChartProps = {
   accounts: CryptoAccount[];
 };
 
+type AssetOverviewDoghnutChartState = {
+  total: number;
+};
+
 export class AssetOverviewDoghnutChart extends Component<
   AssetOverviewDoghnutChartProps,
-  {}
+  AssetOverviewDoghnutChartState
 > {
+  state = {
+    total: 0,
+  };
+
   parseChartOption(): any {
     const options = {
       plugins: {
@@ -52,6 +60,7 @@ export class AssetOverviewDoghnutChart extends Component<
 
     const tmpData: any[] = [];
     const labels: any[] = [];
+
     allHoldings
       .map((holding) => {
         holding.price = getAssetLatestPrice(holding.symbol, assets);
@@ -91,6 +100,7 @@ export class AssetOverviewDoghnutChart extends Component<
         },
       ],
     };
+
     return data;
   }
 
