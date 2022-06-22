@@ -11,18 +11,25 @@ import {CryptoTransaction} from '../../models/cryptotransaction';
 import {TaxReport} from '../../models/taxreport/TaxReport';
 import {TransactionType} from '../../models/transaction';
 import {printTaxReport} from '../../../utils/TaxReportPrinter';
+import ExportTaxReportError from './ExportTaxReportError';
+import {TaxReportError} from '../../models/TaxReportError';
+import moment from 'moment';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoOverviewState = {
   showNewAccountModal: boolean;
+  showExportTaxModal: boolean;
   isUpdate: boolean;
   accounts: CryptoAccount[];
   selectedAccount: CryptoAccount;
+  errorTaxReport: TaxReportError[];
 };
 
 export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   state: CryptoOverviewState = {
     showNewAccountModal: false,
+    showExportTaxModal: false,
+    errorTaxReport: [],
     accounts: [],
     isUpdate: false,
     selectedAccount: new CryptoAccount(
@@ -83,6 +90,10 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     this.setShowNewAccountModal(false);
   }
 
+  onCloseTaxReportModal(): void {
+    this.setState({showExportTaxModal: false});
+  }
+
   onEditAccount(acc: CryptoAccount) {
     this.setState({isUpdate: true, selectedAccount: acc});
     this.setShowNewAccountModal(true);
@@ -108,7 +119,10 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
           assets.push(getCryptoAsset(a));
         }
         this.calculateTaxReport(2022, accounts, assets);
-      });
+      })
+      .catch((error: TaxReportError) =>
+        this.setState({errorTaxReport: [error], showExportTaxModal: true}),
+      );
   }
 
   extractTransactions(accounts: CryptoAccount[]): CryptoTransaction[] {
@@ -123,12 +137,29 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     return transactions;
   }
 
+  validateAsset(asset: CryptoAsset) {
+    const today = moment();
+    if (!asset.latestUpdate || !asset.prices || asset.prices.length === 0) {
+      throw new TaxReportError(
+        'Asset with symbol ' + asset.symbol + ' has no pricefeed!',
+        'Add provider id and refresh price feed in the "Assets" view!',
+      );
+    }
+    if (today.diff(moment(asset.latestUpdate), 'days') > 1) {
+      throw new TaxReportError(
+        'Outdated price feed for asset ' + asset.symbol + '!',
+        'Refresh price feed in the "Assets" view!',
+      );
+    }
+  }
+
   calculateTaxReport(
     year: number,
     accounts: CryptoAccount[],
     assets: CryptoAsset[],
   ) {
     const taxReport: TaxReport = new TaxReport(year);
+
     for (const a of accounts) {
       if (!a.transactions) {
         continue;
@@ -136,8 +167,12 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
       for (const t of a.transactions) {
         const tempAsset = getCryptoAssetFromSymbol(t.symbol, assets);
         if (!tempAsset) {
-          throw new Error('Could not find asset with symbol: ' + t.symbol);
+          throw new TaxReportError(
+            'Could not find asset with symbol: ' + t.symbol,
+            'Add a new asset with the mentioned symbol in the "Assets" view',
+          );
         }
+        this.validateAsset(tempAsset);
         switch (t.type) {
           case TransactionType.STAKING_REWARD:
             taxReport.addIncome(a, t, tempAsset);
@@ -261,6 +296,12 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
               }
               onCloseModal={() => this.onCloseModal()}
             ></AddCryptoAccount>
+          ) : null}
+          {this.state.showExportTaxModal ? (
+            <ExportTaxReportError
+              errors={this.state.errorTaxReport}
+              onCloseModal={() => this.onCloseTaxReportModal()}
+            ></ExportTaxReportError>
           ) : null}
         </div>
       </div>
