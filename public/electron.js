@@ -87,7 +87,7 @@ ipcMain.on('update-app', (event, arg) => {
 });
 
 async function checkForUpdate(event) {
-  const api = 'https://api.github.com/repos/exAphex/p2pmanager/releases';
+  const api = 'https://api.github.com/repos/exAphex/crypfolio/releases';
   const response = await fetch(api, {method: 'GET'});
   const json = await response.json();
   if (json && json.length > 0) {
@@ -105,7 +105,7 @@ async function checkForUpdate(event) {
       notification.show();
 
       notification.on('click', (event, arg) => {
-        const url = 'https://github.com/exAphex/p2pmanager/releases/';
+        const url = 'https://github.com/exAphex/crypfolio/releases/';
         require('electron').shell.openExternal(url);
       });
     }

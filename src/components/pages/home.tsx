@@ -48,6 +48,7 @@ export class HomePage extends Component<{}, HomePageState> {
     );
     ipcRenderer.send('list_crypto_accounts');
     ipcRenderer.send('list_crypto_assets');
+    ipcRenderer.send('update-app', '');
   }
 
   render() {
