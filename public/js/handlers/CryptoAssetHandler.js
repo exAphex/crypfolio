@@ -73,22 +73,6 @@ const addCryptoAssets = (event, arg) => {
   event.reply('list_crypto_assets', assets);
 };
 
-const getCoinList = async () => {
-  let assets = store.getSync('crypto_asset_candidates');
-  let today = moment();
-  if (!assets.latestUpdate) {
-    assets.latestUpdate = 0;
-  }
-
-  if (today.diff(moment(assets.latestUpdate), 'days') > 1) {
-    let queryData = await CoinGeckoProvider.getCoinList();
-    assets.latestUpdate = new Date().getTime();
-    assets.coins = queryData;
-    store.set('crypto_asset_candidates', assets);
-  }
-  return assets.coins;
-};
-
 const updateAsset = (event, arg) => {
   let assets = store.getSync('crypto_assets');
   if (!assets || !Array.isArray(assets)) {
@@ -179,4 +163,3 @@ exports.addCryptoAssets = addCryptoAssets;
 exports.listAssets = listAssets;
 exports.updateAsset = updateAsset;
 exports.getAsset = getAsset;
-exports.getCoinList = getCoinList;

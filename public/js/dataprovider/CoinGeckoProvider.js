@@ -3,16 +3,6 @@ const priceAPI = 'https://api.coingecko.com/api/v3/coins/';
 const coinListAPI = 'https://api.coingecko.com/api/v3/coins/list';
 const moment = require('moment');
 
-const getCoinList = async () => {
-  const responsePrice = await fetch(coinListAPI);
-  const jsonPrice = await responsePrice.json();
-  if (jsonPrice && jsonPrice.length > 0) {
-    return jsonPrice;
-  } else {
-    throw 'Error on data: ' + JSON.stringify(jsonPrice);
-  }
-};
-
 const getCoinPricesBetween = async (coinId, from, to, currency) => {
   let retData = [];
   const startDate = moment(from);
@@ -67,4 +57,3 @@ const upsertTimeData = (arrData, date, value) => {
 
 exports.getCoinPricesBetween = getCoinPricesBetween;
 exports.upsertTimeData = upsertTimeData;
-exports.getCoinList = getCoinList;
