@@ -69,10 +69,6 @@ ipcMain.handle('i_list_crypto_accounts', (event) => {
   return CryptoAccountHandler.listAccounts(event);
 });
 
-ipcMain.handle('i_list_crypto_candidates', (event) => {
-  return CryptoAssetHandler.getCoinList();
-});
-
 ipcMain.on('get-version', (event, arg) => {
   event.reply('query-version', app.getVersion());
 });
