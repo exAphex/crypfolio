@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {v1 as uuidv1} from 'uuid';
 import AddCryptoAccount from './AddCryptoAccount';
 import 'react-datepicker/dist/react-datepicker.css';
-import {CryptoAccount} from '../../models/cryptoaccount';
+import {CryptoAccount, SourceType} from '../../models/cryptoaccount';
 import CryptoAccountLine from '../../table/CryptoAccountLine';
 import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
@@ -36,7 +36,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
       '',
       '',
       '',
-      {id: 'BINANCE', name: 'Binance'},
+      {id: 'BINANCE', name: 'Binance', source: SourceType.CSV},
       '',
       [],
     ),
@@ -67,7 +67,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
         '',
         '',
         '',
-        {id: 'BINANCE', name: 'Binance'},
+        {id: 'BINANCE', name: 'Binance', source: SourceType.CSV},
         '',
         [],
       ),

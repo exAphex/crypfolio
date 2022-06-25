@@ -1,6 +1,6 @@
 import React, {Component, createRef} from 'react';
 import {useParams} from 'react-router-dom';
-import {CryptoAccount} from '../../models/cryptoaccount';
+import {CryptoAccount, SourceType} from '../../models/cryptoaccount';
 import {parseCSVArray} from '../../../utils/CSVImporter';
 import {lowerCase} from '../../../utils/utils';
 import ImportCSVModal from './ImportCSVModal';
@@ -39,7 +39,7 @@ export class CryptoAccountDetail extends Component<
   CryptoAccountDetailState
 > {
   state = {
-    account: new CryptoAccount('', '', '', {id: '', name: ''}, '', []),
+    account: new CryptoAccount('', '', '', {id: '', name: '', source: SourceType.CSV}, '', []),
     assets: [],
     showImportCSVModal: false,
   };

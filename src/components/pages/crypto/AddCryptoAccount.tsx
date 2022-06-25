@@ -3,6 +3,7 @@ import {
   getAccountTypes,
   CryptoAccountType,
   CryptoAccount,
+  SourceType,
 } from '../../models/cryptoaccount';
 
 type AddCryptoAccountType = {
@@ -30,7 +31,7 @@ export class AddCryptoAccount extends Component<
     name: '',
     id: '',
     description: '',
-    type: {id: 'BINANCE', name: 'Binance'},
+    type: {id: 'BINANCE', name: 'Binance', source: SourceType.CSV},
     address: '',
     isUpdate: false,
   };
