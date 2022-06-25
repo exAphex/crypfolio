@@ -9,6 +9,8 @@ export type CryptoAccountType = {
 const accountTypes: CryptoAccountType[] = [
   {id: 'BINANCE', name: 'Binance'},
   {id: 'KRAKEN', name: 'Kraken'},
+  {id: 'CRYPTO.COM', name: 'Crypto.com'},
+  {id: 'LEDGER', name: 'Ledger'},
 ];
 
 export type CryptoAccountDTO = {

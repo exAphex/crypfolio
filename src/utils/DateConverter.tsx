@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export function getFormattedDate(date: Date): string {
   let retStr = '';
   if (date) {
@@ -19,4 +21,8 @@ export function getFormattedDate(date: Date): string {
   }
 
   return retStr;
+}
+
+export function getDateFromString(date: string): Date {
+  return moment(date).toDate();
 }

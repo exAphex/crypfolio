@@ -13,6 +13,8 @@ import {CryptoTransactionDTO} from '../../models/dto/CryptoTransactionDTO';
 import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
 import {KrakenCSVImporter} from '../../../parser/KrakenCSVImporter';
+import {CryptoDotComCSVImporter} from '../../../parser/CryptoDotComCSVImporter';
+import {LedgerCSVImporter} from '../../../parser/LedgerCSVImporter';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
@@ -86,6 +88,12 @@ export class CryptoAccountDetail extends Component<
       case 'KRAKEN':
         const krakenImporter = new KrakenCSVImporter(data);
         return krakenImporter.transactions;
+      case 'CRYPTO.COM':
+        const cryptoDotComImporter = new CryptoDotComCSVImporter(data);
+        return cryptoDotComImporter.transactions;
+      case 'LEDGER':
+        const ledgerImporter = new LedgerCSVImporter(data);
+        return ledgerImporter.transactions;
       default:
         return [];
     }
