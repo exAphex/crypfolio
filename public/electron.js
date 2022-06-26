@@ -7,6 +7,7 @@ const store = require('electron-json-storage');
 const fetch = require('node-fetch');
 const CryptoAccountHandler = require('./js/handlers/CryptoAccountHandler.js');
 const CryptoAssetHandler = require('./js/handlers/CryptoAssetHandler.js');
+const AccountsMigrations = require('./js/migrations/AccountsMigrations.js');
 
 ipcMain.on('list_crypto_accounts', (event, arg) => {
   const accounts = CryptoAccountHandler.listAccounts(event);
@@ -132,9 +133,15 @@ function createWindow() {
     : 'http://localhost:3000';
   mainWindow.loadURL(appURL);
 
+  migrateFiles();
+
   if (!app.isPackaged) {
     mainWindow.webContents.openDevTools();
   }
+}
+
+function migrateFiles() {
+  while (!AccountsMigrations.migrateAccountsFile());
 }
 
 function setupLocalFilesNormalizerProxy() {
