@@ -262,6 +262,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
                 <th className="py-3 px-6 text-left">Name</th>
                 <th className="py-3 px-6 text-left">Type</th>
                 <th className="py-3 px-6 text-left">Description</th>
+                <th className="py-3 px-6 text-left">Address</th>
                 <th className="py-3 px-6 text-right"></th>
               </tr>
             </thead>

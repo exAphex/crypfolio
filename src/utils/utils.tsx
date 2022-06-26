@@ -2,6 +2,7 @@ import krakenLogo from '../assets/kraken.png';
 import binanceLogo from '../assets/binance.ico';
 import cryptodotcomLogo from '../assets/cryptodotcom.png';
 import ledgerLogo from '../assets/ledger.png';
+import bitcoinLogo from '../assets/bitcoin.png';
 import React from 'react';
 import {CryptoAccountType} from '../components/models/cryptoaccount';
 
@@ -21,6 +22,8 @@ export function getIconByAccountType(type: CryptoAccountType) {
       );
     case 'LEDGER':
       return <img width="24" height="24" src={ledgerLogo} alt="Ledger" />;
+    case 'BITCOIN-NETWORK':
+      return <img width="24" height="24" src={bitcoinLogo} alt="Bitcoin" />;
     default:
       return null;
   }
