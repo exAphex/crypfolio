@@ -18,10 +18,21 @@ const migrateAccountsFile = async () => {
         retFile.accounts = [];
       }
       retFile.version = '1';
+
       await store.setAsync('crypto_accounts', retFile);
       return false;
     }
     case '1': {
+      for (let i = 0; i < accountsFile.accounts.length; i++) {
+        if (!accountsFile.accounts[i].type.source) {
+          accountsFile.accounts[i].type.source = 0;
+        }
+      }
+      accountsFile.version = '2';
+      await store.setAsync('crypto_accounts', accountsFile);
+      return false;
+    }
+    case '2': {
       return true;
     }
   }
