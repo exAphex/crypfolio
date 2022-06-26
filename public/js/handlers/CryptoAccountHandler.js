@@ -1,18 +1,28 @@
 const store = require('electron-json-storage');
 
 const listAccounts = (event) => {
-  let accounts = store.getSync('crypto_accounts');
-  if (!accounts || !Array.isArray(accounts)) {
-    accounts = [];
+  let accountFile = store.getSync('crypto_accounts');
+  var accounts = [];
+  if (
+    accountFile &&
+    accountFile.accounts &&
+    Array.isArray(accountFile.accounts)
+  ) {
+    accounts = accountFile.accounts;
   }
   return accounts;
 };
 
 const getAccount = (event, id) => {
-  let accounts = store.getSync('crypto_accounts');
   let retAccount = null;
-  if (!accounts || !Array.isArray(accounts)) {
-    accounts = [];
+  let accountFile = store.getSync('crypto_accounts');
+  var accounts = [];
+  if (
+    accountFile &&
+    accountFile.accounts &&
+    Array.isArray(accountFile.accounts)
+  ) {
+    accounts = accountFile.accounts;
   }
   for (let i = 0; i < accounts.length; i++) {
     if (accounts[i].id === id) {
@@ -24,21 +34,32 @@ const getAccount = (event, id) => {
 };
 
 const addAccount = (event, arg) => {
-  let accounts = store.getSync('crypto_accounts');
-  if (!accounts || !Array.isArray(accounts)) {
-    accounts = [];
+  let accountFile = store.getSync('crypto_accounts');
+  var accounts = [];
+  if (
+    accountFile &&
+    accountFile.accounts &&
+    Array.isArray(accountFile.accounts)
+  ) {
+    accounts = accountFile.accounts;
   }
 
   accounts.push(arg);
+  accountFile.accounts = accounts;
 
-  store.set('crypto_accounts', accounts);
+  store.set('crypto_accounts', accountFile);
   event.reply('list_crypto_accounts', accounts);
 };
 
 const updateAccount = (event, arg) => {
-  let accounts = store.getSync('crypto_accounts');
-  if (!accounts || !Array.isArray(accounts)) {
-    accounts = [];
+  let accountFile = store.getSync('crypto_accounts');
+  var accounts = [];
+  if (
+    accountFile &&
+    accountFile.accounts &&
+    Array.isArray(accountFile.accounts)
+  ) {
+    accounts = accountFile.accounts;
   }
 
   for (let i = 0; i < accounts.length; i++) {
@@ -50,15 +71,22 @@ const updateAccount = (event, arg) => {
     }
   }
 
-  store.set('crypto_accounts', accounts);
+  accountFile.accounts = accounts;
+
+  store.set('crypto_accounts', accountFile);
   event.reply('list_crypto_accounts', accounts);
 };
 
 const addAccountTransactions = (event, arg) => {
-  let accounts = store.getSync('crypto_accounts');
   let retAcc = null;
-  if (!accounts || !Array.isArray(accounts)) {
-    accounts = [];
+  let accountFile = store.getSync('crypto_accounts');
+  var accounts = [];
+  if (
+    accountFile &&
+    accountFile.accounts &&
+    Array.isArray(accountFile.accounts)
+  ) {
+    accounts = accountFile.accounts;
   }
 
   for (let i = 0; i < accounts.length; i++) {
@@ -84,14 +112,21 @@ const addAccountTransactions = (event, arg) => {
     }
   }
 
-  store.set('crypto_accounts', accounts);
+  accountFile.accounts = accounts;
+
+  store.set('crypto_accounts', accountFile);
   event.reply('get_crypto_account', retAcc);
 };
 
 const deleteAccount = (event, arg) => {
-  let accounts = store.getSync('crypto_accounts');
-  if (!accounts || !Array.isArray(accounts)) {
-    accounts = [];
+  let accountFile = store.getSync('crypto_accounts');
+  var accounts = [];
+  if (
+    accountFile &&
+    accountFile.accounts &&
+    Array.isArray(accountFile.accounts)
+  ) {
+    accounts = accountFile.accounts;
   }
 
   for (let i = 0; i < accounts.length; i++) {
@@ -101,7 +136,9 @@ const deleteAccount = (event, arg) => {
     }
   }
 
-  store.set('crypto_accounts', accounts);
+  accountFile.accounts = accounts;
+
+  store.set('crypto_accounts', accountFile);
   event.reply('list_crypto_accounts', accounts);
 };
 
