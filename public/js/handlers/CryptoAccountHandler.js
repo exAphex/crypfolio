@@ -1,5 +1,5 @@
 const store = require('electron-json-storage');
-const { getBitcoinTransactions } = require('./js/dataprovider/BitcoinProvider.js');
+const { getBitcoinTransactions } = require('../dataprovider/BitcoinProvider.js');
 
 const listAccounts = (event) => {
   let accountFile = store.getSync('crypto_accounts');

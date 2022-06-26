@@ -151,7 +151,16 @@ export class CryptoAccountDetail extends Component<
     return false;
   }
 
-  onRefreshAccount() {}
+  onRefreshAccount(account: CryptoAccount) {
+    ipcRenderer
+      .invoke('soft_query_crypto_account', account.id)
+      .then((transactions: CryptoTransactionDTO[]) => {
+        console.log(transactions);
+      })
+      .catch((error: Error) => {
+        
+      });
+  }
 
   render() {
     return (
@@ -193,7 +202,7 @@ export class CryptoAccountDetail extends Component<
               {this.state.account.type.source === SourceType.API ? (
                 <div className="shadow rounded-lg flex mr-2">
                   <button
-                    onClick={() => this.onRefreshAccount()}
+                    onClick={() => this.onRefreshAccount(this.state.account)}
                     type="button"
                     className="rounded-lg inline-flex items-center bg-white hover:text-purple-500 focus:outline-none focus:shadow-outline text-gray-500 font-semibold py-2 px-2 md:px-4"
                   >
