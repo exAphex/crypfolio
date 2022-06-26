@@ -269,7 +269,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
             <tbody className="text-gray-600 text-sm ">
               {this.state.accounts
                 .sort((l, u) => {
-                  return l.name < u.name ? 1 : -1;
+                  return l.name > u.name ? 1 : -1;
                 })
                 .map((item) => (
                   <CryptoAccountLine
