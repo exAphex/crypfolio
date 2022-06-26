@@ -1,6 +1,5 @@
 const fetch = require('node-fetch');
 const priceAPI = 'https://api.coingecko.com/api/v3/coins/';
-const coinListAPI = 'https://api.coingecko.com/api/v3/coins/list';
 const moment = require('moment');
 
 const getCoinPricesBetween = async (coinId, from, to, currency) => {
@@ -39,7 +38,7 @@ const getCoinPricesBetween = async (coinId, from, to, currency) => {
       retData = upsertTimeData(retData, tempDate.getTime(), sortedPrices[i][1]);
     }
   } else {
-    throw 'Error on data: ' + JSON.stringify(jsonPrice);
+    throw new Error('Error on data: ' + JSON.stringify(jsonPrice));
   }
   return retData;
 };

@@ -62,6 +62,18 @@ ipcMain.handle('soft_query_crypto_asset', (event, id) => {
   }
 });
 
+ipcMain.handle('soft_query_crypto_account', (event, id) => {
+  try {
+    return CryptoAccountHandler.queryCryptoAccountHistory(id);
+  } catch (e) {
+    throw {
+      messsage: 'Generic error',
+      error: e,
+    };
+  }
+});
+
+
 ipcMain.handle('i_list_crypto_assets', (event) => {
   return CryptoAssetHandler.listAssets(event);
 });
@@ -95,7 +107,7 @@ async function checkForUpdate(event) {
     json.sort(function (l, u) {
       return new Date(l.published_at) < new Date(u.published_at) ? 1 : -1;
     });
-    if (json[0].name != app.getVersion()) {
+    if (json[0].name !== app.getVersion()) {
       const notification = new Notification({
         title: 'New Version available',
         body:

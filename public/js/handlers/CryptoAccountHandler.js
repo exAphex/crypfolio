@@ -1,4 +1,5 @@
 const store = require('electron-json-storage');
+const { getBitcoinTransactions } = require('./js/dataprovider/BitcoinProvider.js');
 
 const listAccounts = (event) => {
   let accountFile = store.getSync('crypto_accounts');
@@ -151,9 +152,28 @@ const checkDuplicateTransaction = (transactions, t) => {
   return false;
 };
 
+const queryCryptoAccountHistory = (id) => {
+  let accountFile = store.getSync('crypto_accounts');
+  var accounts = [];
+  if (
+    accountFile &&
+    accountFile.accounts &&
+    Array.isArray(accountFile.accounts)
+  ) {
+    accounts = accountFile.accounts;
+  }
+  for (let i = 0; i < accounts.length; i++) {
+    if (accounts[i].id === id) {
+      return getBitcoinTransactions('34QaGHBL9LWcxX4QHaR4ymwkUNW1zhyjt5','');
+    }
+  }
+  return [];
+};
+
 exports.listAccounts = listAccounts;
 exports.addAccount = addAccount;
 exports.deleteAccount = deleteAccount;
 exports.updateAccount = updateAccount;
 exports.getAccount = getAccount;
 exports.addAccountTransactions = addAccountTransactions;
+exports.queryCryptoAccountHistory = queryCryptoAccountHistory;
