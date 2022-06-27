@@ -152,7 +152,7 @@ const checkDuplicateTransaction = (transactions, t) => {
   return false;
 };
 
-const queryCryptoAccountHistory = (id) => {
+const queryCryptoAccountHistory = (accQueryElem) => {
   let accountFile = store.getSync('crypto_accounts');
   var accounts = [];
   if (
@@ -163,8 +163,8 @@ const queryCryptoAccountHistory = (id) => {
     accounts = accountFile.accounts;
   }
   for (let i = 0; i < accounts.length; i++) {
-    if (accounts[i].id === id) {
-      return getBitcoinTransactions('34QaGHBL9LWcxX4QHaR4ymwkUNW1zhyjt5','');
+    if (accounts[i].id === accQueryElem.id) {
+      return getBitcoinTransactions(accounts[i].address,accQueryElem.maxTransactionHash);
     }
   }
   return [];

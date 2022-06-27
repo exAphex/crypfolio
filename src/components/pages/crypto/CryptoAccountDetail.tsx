@@ -152,10 +152,25 @@ export class CryptoAccountDetail extends Component<
   }
 
   onRefreshAccount(account: CryptoAccount) {
+    let maxTransactionHash = '';
+    let transactions = account.transactions
+                .sort((l, u) => {
+                  return l.date < u.date ? 1 : -1;
+                });
+    if (transactions.length > 0) {
+      maxTransactionHash = transactions[0].id;
+    }
     ipcRenderer
-      .invoke('soft_query_crypto_account', account.id)
+      .invoke('soft_query_crypto_account', {id:account.id, maxTransactionHash:maxTransactionHash})
       .then((transactions: CryptoTransactionDTO[]) => {
-        console.log(transactions);
+        ipcRenderer.send('add_crypto_account_transactions', {
+          id: account.id,
+          transactions: transactions,
+        });
+    
+        ipcRenderer.send('add_crypto_assets', {
+          assets: this.getAssetCandidates(transactions),
+        });
       })
       .catch((error: Error) => {
         
