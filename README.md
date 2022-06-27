@@ -10,7 +10,13 @@ Crypfolio is a crypto portfolio tracking app which can calculate tax reports acc
 
 ## Supported platforms
 
+### Blockchain
+- Bitcoin (BTC)
+
+### Exchanges
 - Binance
 - Crypto.com
 - Kraken
+
+### Wallets
 - Ledger
