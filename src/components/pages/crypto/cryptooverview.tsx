@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {v1 as uuidv1} from 'uuid';
 import AddCryptoAccount from './AddCryptoAccount';
 import 'react-datepicker/dist/react-datepicker.css';
-import {CryptoAccount} from '../../models/cryptoaccount';
+import {CryptoAccount, SourceType} from '../../models/cryptoaccount';
 import CryptoAccountLine from '../../table/CryptoAccountLine';
 import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
@@ -36,7 +36,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
       '',
       '',
       '',
-      {id: 'BINANCE', name: 'Binance'},
+      {id: 'BINANCE', name: 'Binance', source: SourceType.CSV},
       '',
       [],
     ),
@@ -67,7 +67,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
         '',
         '',
         '',
-        {id: 'BINANCE', name: 'Binance'},
+        {id: 'BINANCE', name: 'Binance', source: SourceType.CSV},
         '',
         [],
       ),
@@ -262,13 +262,14 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
                 <th className="py-3 px-6 text-left">Name</th>
                 <th className="py-3 px-6 text-left">Type</th>
                 <th className="py-3 px-6 text-left">Description</th>
+                <th className="py-3 px-6 text-left">Address</th>
                 <th className="py-3 px-6 text-right"></th>
               </tr>
             </thead>
             <tbody className="text-gray-600 text-sm ">
               {this.state.accounts
                 .sort((l, u) => {
-                  return l.name < u.name ? 1 : -1;
+                  return l.name > u.name ? 1 : -1;
                 })
                 .map((item) => (
                   <CryptoAccountLine

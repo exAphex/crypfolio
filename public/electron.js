@@ -7,6 +7,7 @@ const store = require('electron-json-storage');
 const fetch = require('node-fetch');
 const CryptoAccountHandler = require('./js/handlers/CryptoAccountHandler.js');
 const CryptoAssetHandler = require('./js/handlers/CryptoAssetHandler.js');
+const AccountsMigrations = require('./js/migrations/AccountsMigrations.js');
 
 ipcMain.on('list_crypto_accounts', (event, arg) => {
   const accounts = CryptoAccountHandler.listAccounts(event);
@@ -61,6 +62,18 @@ ipcMain.handle('soft_query_crypto_asset', (event, id) => {
   }
 });
 
+ipcMain.handle('soft_query_crypto_account', (event, id) => {
+  try {
+    return CryptoAccountHandler.queryCryptoAccountHistory(id);
+  } catch (e) {
+    throw {
+      messsage: 'Generic error',
+      error: e,
+    };
+  }
+});
+
+
 ipcMain.handle('i_list_crypto_assets', (event) => {
   return CryptoAssetHandler.listAssets(event);
 });
@@ -94,7 +107,7 @@ async function checkForUpdate(event) {
     json.sort(function (l, u) {
       return new Date(l.published_at) < new Date(u.published_at) ? 1 : -1;
     });
-    if (json[0].name != app.getVersion()) {
+    if (json[0].name !== app.getVersion()) {
       const notification = new Notification({
         title: 'New Version available',
         body:
@@ -132,9 +145,15 @@ function createWindow() {
     : 'http://localhost:3000';
   mainWindow.loadURL(appURL);
 
+  migrateFiles();
+
   if (!app.isPackaged) {
     mainWindow.webContents.openDevTools();
   }
+}
+
+function migrateFiles() {
+  while (!AccountsMigrations.migrateAccountsFile());
 }
 
 function setupLocalFilesNormalizerProxy() {

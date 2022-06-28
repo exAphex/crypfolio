@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import CSVReader from 'react-csv-reader';
-import {CryptoAccount} from '../../models/cryptoaccount';
+import {CryptoAccount, SourceType} from '../../models/cryptoaccount';
 
 type ImportCSVModalState = {
   account: CryptoAccount;
@@ -18,7 +18,7 @@ export class ImportCSVModal extends Component<
   ImportCSVModalState
 > {
   state: ImportCSVModalState = {
-    account: new CryptoAccount('', '', '', {id: '', name: ''}, '', []),
+    account: new CryptoAccount('', '', '', {id: '', name: '', source: SourceType.CSV}, '', []),
     data: [],
   };
 

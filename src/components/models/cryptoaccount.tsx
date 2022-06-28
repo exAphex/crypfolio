@@ -1,14 +1,23 @@
 import {Account} from './account';
 import {CryptoTransaction} from './cryptotransaction';
 
+export enum SourceType {
+  CSV,
+  API
+}
+
 export type CryptoAccountType = {
   id: string;
   name: string;
+  source: SourceType;
 };
 
 const accountTypes: CryptoAccountType[] = [
-  {id: 'BINANCE', name: 'Binance'},
-  {id: 'KRAKEN', name: 'Kraken'},
+  {id: 'BINANCE', name: 'Binance', source : SourceType.CSV},
+  {id: 'KRAKEN', name: 'Kraken', source : SourceType.CSV},
+  {id: 'CRYPTO.COM', name: 'Crypto.com', source : SourceType.CSV},
+  {id: 'LEDGER', name: 'Ledger', source: SourceType.CSV},
+  {id: 'BITCOIN-NETWORK', name: 'Bitcoin (Network)', source: SourceType.API},
 ];
 
 export type CryptoAccountDTO = {

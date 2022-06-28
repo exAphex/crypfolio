@@ -1,8 +1,9 @@
 import {CryptoTransaction} from '../components/models/cryptotransaction';
 import {TransactionType} from '../components/models/transaction';
 import moment from 'moment';
+import {CSVImporterInterface} from './CSVImporterInterface';
 
-export class KrakenCSVImporter {
+export class KrakenCSVImporter implements CSVImporterInterface {
   transactions: CryptoTransaction[];
 
   constructor(data: string[][]) {
@@ -30,7 +31,7 @@ export class KrakenCSVImporter {
       data[0][8] !== 'fee' ||
       data[0][9] !== 'balance'
     ) {
-      return false;
+      throw new Error('Could not recognize CSV file!');
     }
     return true;
   }
@@ -65,7 +66,7 @@ export class KrakenCSVImporter {
             line[0] + 'fee',
             getDateFromString(line[2]),
             TransactionType.FEE,
-            -1*Number(line[8]),
+            -1 * Number(line[8]),
             parseSymbol(line[6]),
           ),
         );
@@ -81,36 +82,33 @@ function getDateFromString(date: string): Date {
 
 function fixKrakenSymbol(symbol: string) {
   switch (symbol) {
-    case "XXBT":
-      return "BTC";
-    case "XXRP":
-      return "XRP";
-    case "LUNA2":
-      return "LUNA";
-    case "LUNA":
-      return "LUNC";
-    case "ZEUR":
-      return "EUR";
+    case 'XXBT':
+      return 'BTC';
+    case 'XXRP':
+      return 'XRP';
+    case 'LUNA2':
+      return 'LUNA';
+    case 'LUNA':
+      return 'LUNC';
+    case 'ZEUR':
+      return 'EUR';
     default:
       return symbol;
   }
 }
 
-function parseSymbol(symbol: string) : string {
+function parseSymbol(symbol: string): string {
   if (!symbol) {
-    return "";
+    return '';
   }
 
   symbol = symbol.toUpperCase();
-
-  // mismatch of Kraken symbols
-  
 
   if (symbol.length < 2) {
     return fixKrakenSymbol(symbol);
   }
 
-  let possibleSuffix = symbol.slice(-2);
+  const possibleSuffix = symbol.slice(-2);
 
   if (possibleSuffix === '.S') {
     return fixKrakenSymbol(symbol.slice(0, -2));
@@ -119,15 +117,12 @@ function parseSymbol(symbol: string) : string {
   }
 }
 
-function getTransactionType(
-  data: string,
-  amount: number
-): TransactionType {
+function getTransactionType(data: string, amount: number): TransactionType {
   switch (data) {
     case 'staking': {
       return TransactionType.STAKING_REWARD;
     }
-    case 'trade' : {
+    case 'trade': {
       if (amount >= 0) {
         return TransactionType.BUY;
       } else {

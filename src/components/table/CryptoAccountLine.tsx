@@ -30,6 +30,9 @@ export class CryptoAccountLine extends Component<CryptoAccountLineProps, {}> {
         <td className="py-3 px-6 text-left">
           <span>{this.props.account.description}</span>
         </td>
+        <td className="py-3 px-6 text-left">
+          <span>{this.props.account.address}</span>
+        </td>
         <td className="py-3 px-6 text-center">
           <div className="flex item-center justify-end">
             <div

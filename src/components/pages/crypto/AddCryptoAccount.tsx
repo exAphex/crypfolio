@@ -3,6 +3,7 @@ import {
   getAccountTypes,
   CryptoAccountType,
   CryptoAccount,
+  SourceType,
 } from '../../models/cryptoaccount';
 
 type AddCryptoAccountType = {
@@ -30,7 +31,7 @@ export class AddCryptoAccount extends Component<
     name: '',
     id: '',
     description: '',
-    type: {id: 'BINANCE', name: 'Binance'},
+    type: {id: 'BINANCE', name: 'Binance', source: SourceType.CSV},
     address: '',
     isUpdate: false,
   };
@@ -65,6 +66,10 @@ export class AddCryptoAccount extends Component<
 
   updateDescriptionValue(evt: React.ChangeEvent<HTMLInputElement>) {
     this.setState({description: evt.target.value});
+  }
+
+  updateAddressValue(evt: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({address: evt.target.value});
   }
 
   onSaveAccount() {
@@ -181,7 +186,20 @@ export class AddCryptoAccount extends Component<
                         </div>
                       </div>
                     ) : null}
-
+                    {this.state.type.source === SourceType.API ? (
+                      <div className="mb-1 w-full flex-col mt-3">
+                        <label className="font-medium text-gray-800 py-2">
+                          Address
+                        </label>
+                        <input
+                          value={this.state.address}
+                          onChange={(evt) => this.updateAddressValue(evt)}
+                          type="text"
+                          placeholder="btc1234567890"
+                          className="px-4 h-10 placeholder-blueGray-300 text-blueGray-600 relative bg-white bg-white rounded border border-grey-lighter w-full"
+                        />
+                      </div>
+                    ) : null}
                     <div className="mb-1 w-full flex-col mt-3">
                       <label className="font-medium text-gray-800 py-2">
                         Description

@@ -1,6 +1,6 @@
 import React, {Component, createRef} from 'react';
 import {useParams} from 'react-router-dom';
-import {CryptoAccount} from '../../models/cryptoaccount';
+import {CryptoAccount, SourceType} from '../../models/cryptoaccount';
 import {parseCSVArray} from '../../../utils/CSVImporter';
 import {lowerCase} from '../../../utils/utils';
 import ImportCSVModal from './ImportCSVModal';
@@ -13,6 +13,8 @@ import {CryptoTransactionDTO} from '../../models/dto/CryptoTransactionDTO';
 import {CryptoAccountDTO, getAccount} from '../../models/dto/CryptoAccountDTO';
 import {CryptoAssetDTO, getCryptoAsset} from '../../models/dto/CryptoAssetDTO';
 import {KrakenCSVImporter} from '../../../parser/KrakenCSVImporter';
+import {CryptoDotComCSVImporter} from '../../../parser/CryptoDotComCSVImporter';
+import {LedgerCSVImporter} from '../../../parser/LedgerCSVImporter';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoAccountDetailParams = {id: string};
@@ -37,7 +39,14 @@ export class CryptoAccountDetail extends Component<
   CryptoAccountDetailState
 > {
   state = {
-    account: new CryptoAccount('', '', '', {id: '', name: ''}, '', []),
+    account: new CryptoAccount(
+      '',
+      '',
+      '',
+      {id: '', name: '', source: SourceType.CSV},
+      '',
+      [],
+    ),
     assets: [],
     showImportCSVModal: false,
   };
@@ -86,6 +95,12 @@ export class CryptoAccountDetail extends Component<
       case 'KRAKEN':
         const krakenImporter = new KrakenCSVImporter(data);
         return krakenImporter.transactions;
+      case 'CRYPTO.COM':
+        const cryptoDotComImporter = new CryptoDotComCSVImporter(data);
+        return cryptoDotComImporter.transactions;
+      case 'LEDGER':
+        const ledgerImporter = new LedgerCSVImporter(data);
+        return ledgerImporter.transactions;
       default:
         return [];
     }
@@ -136,6 +151,32 @@ export class CryptoAccountDetail extends Component<
     return false;
   }
 
+  onRefreshAccount(account: CryptoAccount) {
+    let maxTransactionHash = '';
+    let transactions = account.transactions
+                .sort((l, u) => {
+                  return l.date < u.date ? 1 : -1;
+                });
+    if (transactions.length > 0) {
+      maxTransactionHash = transactions[0].id;
+    }
+    ipcRenderer
+      .invoke('soft_query_crypto_account', {id:account.id, maxTransactionHash:maxTransactionHash})
+      .then((transactions: CryptoTransactionDTO[]) => {
+        ipcRenderer.send('add_crypto_account_transactions', {
+          id: account.id,
+          transactions: transactions,
+        });
+    
+        ipcRenderer.send('add_crypto_assets', {
+          assets: this.getAssetCandidates(transactions),
+        });
+      })
+      .catch((error: Error) => {
+        
+      });
+  }
+
   render() {
     return (
       <div className="h-full flex flex-col">
@@ -147,30 +188,58 @@ export class CryptoAccountDetail extends Component<
           <p className="relative w-full pr-4 max-w-full flex-grow flex-1 text-3xl font-bold text-black"></p>
           <div className="relative w-auto pl-1 flex-initial p-1 ">
             <div className="pt-2 flex gap-2">
-              <div className="shadow rounded-lg flex mr-2">
-                <button
-                  onClick={() => this.onImportCSV()}
-                  type="button"
-                  className="rounded-lg inline-flex items-center bg-white hover:text-purple-500 focus:outline-none focus:shadow-outline text-gray-500 font-semibold py-2 px-2 md:px-4"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
+              {this.state.account.type.source === SourceType.CSV ? (
+                <div className="shadow rounded-lg flex mr-2">
+                  <button
+                    onClick={() => this.onImportCSV()}
+                    type="button"
+                    className="rounded-lg inline-flex items-center bg-white hover:text-purple-500 focus:outline-none focus:shadow-outline text-gray-500 font-semibold py-2 px-2 md:px-4"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
 
-                  <span className="hidden md:block ml-2">Import CSV</span>
-                </button>
-              </div>
+                    <span className="hidden md:block ml-2">Import CSV</span>
+                  </button>
+                </div>
+              ) : null}
+              {this.state.account.type.source === SourceType.API ? (
+                <div className="shadow rounded-lg flex mr-2">
+                  <button
+                    onClick={() => this.onRefreshAccount(this.state.account)}
+                    type="button"
+                    className="rounded-lg inline-flex items-center bg-white hover:text-purple-500 focus:outline-none focus:shadow-outline text-gray-500 font-semibold py-2 px-2 md:px-4"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+
+                    <span className="hidden md:block ml-2">Refresh</span>
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
