@@ -16,6 +16,9 @@ export function printTaxReport(report: TaxReport) {
   // income calculation
   const incomeLines: RowInput[] = [];
   let incomeTotal = 0;
+  report.taxableIncome = report.taxableIncome.sort((l, u) => {
+    return l.date > u.date ? 1 : -1;
+  });
   for (const i of report.taxableIncome) {
     incomeTotal += i.amount * i.price;
     incomeLines.push([

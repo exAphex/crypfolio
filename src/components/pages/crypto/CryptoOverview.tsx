@@ -14,11 +14,13 @@ import {printTaxReport} from '../../../utils/TaxReportPrinter';
 import ExportTaxReportError from './taxreport/ExportTaxReportError';
 import {TaxReportError} from '../../models/TaxReportError';
 import moment from 'moment';
+import ExportTaxReportProperties from './taxreport/ExportTaxReportProperties';
 const {ipcRenderer} = window.require('electron');
 
 type CryptoOverviewState = {
   showNewAccountModal: boolean;
   showExportTaxModal: boolean;
+  showExportTaxPropertiesModal: boolean;
   isUpdate: boolean;
   accounts: CryptoAccount[];
   selectedAccount: CryptoAccount;
@@ -29,6 +31,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
   state: CryptoOverviewState = {
     showNewAccountModal: false,
     showExportTaxModal: false,
+    showExportTaxPropertiesModal: false,
     errorTaxReport: [],
     accounts: [],
     isUpdate: false,
@@ -94,6 +97,10 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     this.setState({showExportTaxModal: false});
   }
 
+  onCloseTaxExportPropertiesModal(): void {
+    this.setState({showExportTaxPropertiesModal: false});
+  }
+
   onEditAccount(acc: CryptoAccount) {
     this.setState({isUpdate: true, selectedAccount: acc});
     this.setShowNewAccountModal(true);
@@ -103,7 +110,7 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     ipcRenderer.send('delete_crypto_account', acc);
   }
 
-  onGenerateTaxReport() {
+  generateTaxReport(year: number) {
     const accounts: CryptoAccount[] = [];
     const assets: CryptoAsset[] = [];
     ipcRenderer
@@ -118,11 +125,15 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
         for (const a of ass) {
           assets.push(getCryptoAsset(a));
         }
-        this.calculateTaxReport(2022, accounts, assets);
+        this.calculateTaxReport(year, accounts, assets);
       })
       .catch((error: TaxReportError) =>
         this.setState({errorTaxReport: [error], showExportTaxModal: true}),
       );
+  }
+
+  onGenerateTaxReport() {
+    this.setState({showExportTaxPropertiesModal: true});
   }
 
   extractTransactions(accounts: CryptoAccount[]): CryptoTransaction[] {
@@ -303,6 +314,15 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
               errors={this.state.errorTaxReport}
               onCloseModal={() => this.onCloseTaxReportModal()}
             ></ExportTaxReportError>
+          ) : null}
+          {this.state.showExportTaxPropertiesModal ? (
+            <ExportTaxReportProperties
+              onGenerateTaxReport={(year) => {
+                this.setState({showExportTaxPropertiesModal: false});
+                this.generateTaxReport(year);
+              }}
+              onCloseModal={() => this.onCloseTaxExportPropertiesModal()}
+            ></ExportTaxReportProperties>
           ) : null}
         </div>
       </div>
