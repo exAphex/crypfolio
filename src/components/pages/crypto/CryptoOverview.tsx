@@ -11,7 +11,7 @@ import {CryptoTransaction} from '../../models/cryptotransaction';
 import {TaxReport} from '../../models/taxreport/TaxReport';
 import {TransactionType} from '../../models/transaction';
 import {printTaxReport} from '../../../utils/TaxReportPrinter';
-import ExportTaxReportError from './ExportTaxReportError';
+import ExportTaxReportError from './taxreport/ExportTaxReportError';
 import {TaxReportError} from '../../models/TaxReportError';
 import moment from 'moment';
 const {ipcRenderer} = window.require('electron');
