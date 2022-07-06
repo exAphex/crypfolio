@@ -26,9 +26,9 @@ Crypfolio is a crypto portfolio tracking app which can calculate tax reports acc
 
 ## Screenshots
 
-### Overview
+### Dashboard
 
-![Overview](https://raw.githubusercontent.com/exAphex/crypfolio/main/assets/overview.png)
+![Dashboard](https://raw.githubusercontent.com/exAphex/crypfolio/main/assets/dashboard.png)
 
 ### Account
 
