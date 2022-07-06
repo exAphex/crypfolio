@@ -16,7 +16,7 @@ export class TaxReport {
     transaction: CryptoTransaction,
     asset: CryptoAsset,
   ) {
-    if (transaction.date > new Date(this.taxYear, 0, 1)) {
+    if (transaction.date.getFullYear() === this.taxYear) {
       this.taxableIncome.push(
         new TaxableIncome(
           account,

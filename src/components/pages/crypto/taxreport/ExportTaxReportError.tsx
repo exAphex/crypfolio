@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
-import {TaxReportError} from '../../models/TaxReportError';
-import ErrorLine from '../../table/ErrorLine';
+import {TaxReportError} from '../../../models/TaxReportError';
+import ErrorLine from '../../../table/ErrorLine';
 
 type ExportTaxReportErrorProps = {
   errors: TaxReportError[];
