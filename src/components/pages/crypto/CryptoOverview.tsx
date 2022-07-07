@@ -169,31 +169,8 @@ export class CryptoOverview extends Component<{}, CryptoOverviewState> {
     accounts: CryptoAccount[],
     assets: CryptoAsset[],
   ) {
-    const taxReport: TaxReport = new TaxReport(year);
-
-    for (const a of accounts) {
-      if (!a.transactions) {
-        continue;
-      }
-      for (const t of a.transactions) {
-        const tempAsset = getCryptoAssetFromSymbol(t.symbol, assets);
-        if (!tempAsset) {
-          throw new TaxReportError(
-            'Could not find asset with symbol: ' + t.symbol,
-            'Add a new asset with the mentioned symbol in the "Assets" view',
-          );
-        }
-        this.validateAsset(tempAsset);
-        switch (t.type) {
-          case TransactionType.STAKING_REWARD:
-            taxReport.addIncome(a, t, tempAsset);
-            break;
-          case TransactionType.DISTRIBUTION:
-            taxReport.addIncome(a, t, tempAsset);
-        }
-      }
-    }
-
+    const taxReport: TaxReport = new TaxReport(year, assets);
+    taxReport.addAccounts(accounts);
     this.printTaxReport(taxReport);
   }
 
