@@ -49,15 +49,6 @@ export class TaxReport {
     }
   }
 
-  getCryptoHolding(acc: CryptoAccount): CryptoHolding[] {
-    let retCryptoHoldings: CryptoHolding[] = [];
-    const transactions = acc.transactions;
-    if (transactions) {
-      retCryptoHoldings = getBalance(transactions);
-    }
-    return retCryptoHoldings;
-  }
-
   private addIncome(
     account: CryptoAccount,
     transaction: CryptoTransaction,

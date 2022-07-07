@@ -2,8 +2,9 @@ import {TaxReport} from '../components/models/taxreport/TaxReport';
 import jsPDF from 'jspdf';
 import autoTable, {RowInput} from 'jspdf-autotable';
 import {getFormattedDate} from './DateConverter';
-import {toEuro} from './PriceUtils';
+import {getAssetLatestPrice, toEuro} from './PriceUtils';
 import {getTransactionType} from '../components/models/transaction';
+import {getBalance} from './CryptoCalculator';
 
 export function printTaxReport(report: TaxReport) {
   const doc = new jsPDF();
@@ -13,7 +14,13 @@ export function printTaxReport(report: TaxReport) {
   doc.text('Report for year: ' + report.taxYear, 75, 150);
   doc.addPage(undefined, 'landscape');
 
-  // income calculation
+  addIncomePage(doc, report);
+  addHoldingsPage(doc, report);
+
+  doc.save('table.pdf');
+}
+
+function addIncomePage(doc: jsPDF, report: TaxReport) {
   const incomeLines: RowInput[] = [];
   let incomeTotal = 0;
   report.taxableIncome = report.taxableIncome.sort((l, u) => {
@@ -30,19 +37,54 @@ export function printTaxReport(report: TaxReport) {
       toEuro(i.amount * i.price),
     ]);
   }
-  incomeLines.push(['Total', '', '', '', '', toEuro(incomeTotal)]);
+  incomeLines.push();
 
   autoTable(doc, {
     head: [['Account', 'Date', 'Asset', 'Type', 'Amount', 'Total value']],
     body: incomeLines,
-    willDrawCell(data) {
-      const rows = data.table.body;
-      if (data.row.index === rows.length - 1) {
-        doc.setFillColor(0, 0, 0);
-        doc.setTextColor(255, 255, 255);
-      }
-    },
+    foot: [['Total', '', '', '', '', toEuro(incomeTotal)]],
+    showFoot: 'lastPage',
   });
+}
 
-  doc.save('table.pdf');
+function addHoldingsPage(doc: jsPDF, report: TaxReport) {
+  let holdingsLine: RowInput[] = [];
+  for (const a of report.accounts) {
+    const balances = getBalance(a.transactions)
+      .map((b) => {
+        b.price = getAssetLatestPrice(b.symbol, report.assets);
+        return b;
+      })
+      .sort((l, u) => {
+        return l.price * l.amount < u.price * u.amount ? 1 : -1;
+      });
+
+    let total = 0;
+    balances.forEach((b) => {
+      total += b.amount * b.price;
+    });
+
+    holdingsLine = [];
+    for (const b of balances) {
+      if (Number(b.amount.toFixed(8)) === 0) {
+        continue;
+      }
+      holdingsLine.push([
+        b.symbol,
+        b.amount.toFixed(8),
+        toEuro(b.price),
+        toEuro(b.amount * b.price),
+      ]);
+    }
+
+    doc.addPage();
+    doc.text(a.name, 14, 20);
+    autoTable(doc, {
+      startY: 25,
+      head: [['Symbol', 'Amount', 'Price per unit', 'Total']],
+      body: holdingsLine,
+      foot: [['Total', '', '', toEuro(total)]],
+      showFoot: 'lastPage',
+    });
+  }
 }
