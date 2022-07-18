@@ -1,5 +1,4 @@
 import {CryptoTransaction} from '../cryptotransaction';
-import {TransactionType} from '../transaction';
 import {TransactionDTO} from './TransactionDTO';
 
 export class CryptoTransactionDTO extends TransactionDTO {

@@ -1,7 +1,5 @@
-import {getBalance} from '../../../utils/CryptoCalculator';
 import {CryptoAccount} from '../cryptoaccount';
 import {CryptoAsset, getCryptoAssetFromSymbol} from '../CryptoAsset';
-import {CryptoHolding} from '../CryptoHolding';
 import {CryptoTransaction} from '../cryptotransaction';
 import {TaxReportError} from '../TaxReportError';
 import {TransactionType} from '../transaction';
