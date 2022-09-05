@@ -7,7 +7,10 @@ import {
   getTransactionType,
   TransactionType,
 } from '../components/models/transaction';
-import {processTransactionToHolding} from './CryptoCalculator';
+import {
+  extractTaxableTransactions,
+  processTransactionToHolding,
+} from './CryptoCalculator';
 import {TaxableTransaction} from '../components/models/taxreport/TaxableTransaction';
 import {
   CryptoAsset,
@@ -15,13 +18,14 @@ import {
 } from '../components/models/CryptoAsset';
 import {TaxReportError} from '../components/models/TaxReportError';
 import {TaxableHolding} from '../components/models/taxreport/TaxableHolding';
+import moment from 'moment';
 
 class PrintedTaxReport {
   income: TaxableTransaction[] = [];
   holdingsAfter: TaxableHolding[] = [];
   assets: CryptoAsset[] = [];
 
-  calculateTransactions(report: TaxReport) {
+  calculateIncome(report: TaxReport) {
     for (const a of report.accounts) {
       for (const t of a.transactions) {
         const tempAsset = getCryptoAssetFromSymbol(t.symbol, report.assets);
@@ -66,10 +70,91 @@ class PrintedTaxReport {
     }
   }
 
+  calculateSales(report: TaxReport) {
+    const transactions = extractTaxableTransactions(report.accounts)
+      .sort((l, u) => {
+        return l.date > u.date ? 1 : -1;
+      })
+      .map((b) => {
+        const tempAsset = getCryptoAssetFromSymbol(b.assetSymbol, this.assets);
+        if (!tempAsset) {
+          throw new TaxReportError(
+            'Could not find asset with symbol: ' + b.assetSymbol,
+            'Add a new asset with the mentioned symbol in the "Assets" view',
+          );
+        }
+        b.price = tempAsset.getPrice(b.date);
+        return b;
+      });
+    const fifoStreamTransactions = extractTaxableTransactions(report.accounts)
+      .sort((l, u) => {
+        return l.date > u.date ? 1 : -1;
+      })
+      .map((b) => {
+        const tempAsset = getCryptoAssetFromSymbol(b.assetSymbol, this.assets);
+        if (!tempAsset) {
+          throw new TaxReportError(
+            'Could not find asset with symbol: ' + b.assetSymbol,
+            'Add a new asset with the mentioned symbol in the "Assets" view',
+          );
+        }
+        b.price = tempAsset.getPrice(b.date);
+        return b;
+      });
+    for (const t of transactions) {
+      if (t.type === TransactionType.SELL) {
+        let profit = this.calculateFifoProfit(t, fifoStreamTransactions);
+        console.log(t);
+        console.log(profit);
+      }
+    }
+  }
+
+  calculateFifoProfit(
+    sale: TaxableTransaction,
+    fifoStream: TaxableTransaction[],
+  ): number {
+    let profit = 0;
+    let fifoAmount = sale.amount * -1;
+
+    for (const t of fifoStream) {
+      if (fifoAmount <= 0) {
+        break;
+      }
+
+      if (
+        sale.assetSymbol === t.assetSymbol &&
+        t.amount > 0 &&
+        (t.type === TransactionType.BUY ||
+          t.type === TransactionType.DEPOSIT ||
+          t.type === TransactionType.DISTRIBUTION ||
+          t.type === TransactionType.STAKING_REWARD)
+      ) {
+        const timeDiffYears = moment(sale.date).diff(t.date, 'years', true);
+        if (fifoAmount >= t.amount) {
+          if (timeDiffYears < 1) {
+            profit += t.amount * sale.price - t.amount * t.price;
+          }
+          fifoAmount -= t.amount;
+          t.amount = 0;
+        } else {
+          if (timeDiffYears < 1) {
+            profit += fifoAmount * sale.price - fifoAmount * t.price;
+          }
+          t.amount -= fifoAmount;
+          fifoAmount = 0;
+          break;
+        }
+      }
+    }
+    return profit;
+  }
+
   constructor(report: TaxReport) {
     this.assets = report.assets;
-    this.calculateTransactions(report);
+    this.calculateIncome(report);
     this.calculateHoldings(report);
+    this.calculateSales(report);
   }
 }
 

@@ -1,6 +1,7 @@
 import {CryptoAccount} from '../components/models/cryptoaccount';
 import {CryptoHolding} from '../components/models/CryptoHolding';
 import {CryptoTransaction} from '../components/models/cryptotransaction';
+import {TaxableTransaction} from '../components/models/taxreport/TaxableTransaction';
 import {TransactionType} from '../components/models/transaction';
 
 export function getBalance(transactions: CryptoTransaction[]): CryptoHolding[] {
@@ -66,6 +67,20 @@ export function extractTransactions(
     if (a.transactions && a.transactions.length > 0) {
       for (const t of a.transactions) {
         transactions.push(t);
+      }
+    }
+  }
+  return transactions;
+}
+
+export function extractTaxableTransactions(
+  accounts: CryptoAccount[],
+): TaxableTransaction[] {
+  const transactions: TaxableTransaction[] = [];
+  for (const a of accounts) {
+    if (a.transactions && a.transactions.length > 0) {
+      for (const t of a.transactions) {
+        transactions.push(new TaxableTransaction(a, t, 0));
       }
     }
   }
