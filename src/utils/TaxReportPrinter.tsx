@@ -3,30 +3,100 @@ import jsPDF from 'jspdf';
 import autoTable, {RowInput} from 'jspdf-autotable';
 import {getFormattedDate} from './DateConverter';
 import {getAssetLatestPrice, toEuro} from './PriceUtils';
-import {getTransactionType} from '../components/models/transaction';
-import {getBalance} from './CryptoCalculator';
+import {
+  getTransactionType,
+  TransactionType,
+} from '../components/models/transaction';
+import {processTransactionToHolding} from './CryptoCalculator';
+import {TaxableTransaction} from '../components/models/taxreport/TaxableTransaction';
+import {
+  CryptoAsset,
+  getCryptoAssetFromSymbol,
+} from '../components/models/CryptoAsset';
+import {TaxReportError} from '../components/models/TaxReportError';
+import {TaxableHolding} from '../components/models/taxreport/TaxableHolding';
+
+class PrintedTaxReport {
+  income: TaxableTransaction[] = [];
+  holdingsAfter: TaxableHolding[] = [];
+  assets: CryptoAsset[] = [];
+
+  calculateTransactions(report: TaxReport) {
+    for (const a of report.accounts) {
+      for (const t of a.transactions) {
+        const tempAsset = getCryptoAssetFromSymbol(t.symbol, report.assets);
+        if (!tempAsset) {
+          throw new TaxReportError(
+            'Could not find asset with symbol: ' + t.symbol,
+            'Add a new asset with the mentioned symbol in the "Assets" view',
+          );
+        }
+        // Previous years
+        if (t.date.getFullYear() === report.taxYear) {
+          switch (t.type) {
+            case TransactionType.STAKING_REWARD:
+              this.income.push(
+                new TaxableTransaction(a, t, tempAsset.getPrice(t.date)),
+              );
+              break;
+            case TransactionType.DISTRIBUTION:
+              this.income.push(
+                new TaxableTransaction(a, t, tempAsset.getPrice(t.date)),
+              );
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  calculateHoldings(report: TaxReport) {
+    this.holdingsAfter = [];
+    for (const a of report.accounts) {
+      const accHolding = new TaxableHolding(a);
+      for (const t of a.transactions) {
+        if (t.date.getFullYear() <= report.taxYear) {
+          accHolding.holdings = processTransactionToHolding(
+            t,
+            accHolding.holdings,
+          );
+        }
+      }
+      this.holdingsAfter.push(accHolding);
+    }
+  }
+
+  constructor(report: TaxReport) {
+    this.assets = report.assets;
+    this.calculateTransactions(report);
+    this.calculateHoldings(report);
+  }
+}
 
 export function printTaxReport(report: TaxReport) {
   const doc = new jsPDF();
+  const printedTaxReport = new PrintedTaxReport(report);
   doc.setFontSize(32);
   doc.text('Crypfolio Tax Report', 50, 140);
   doc.setFontSize(14);
   doc.text('Report for year: ' + report.taxYear, 75, 150);
   doc.addPage(undefined, 'landscape');
 
-  addIncomePage(doc, report);
-  addHoldingsPage(doc, report);
+  addIncomePage(doc, printedTaxReport);
+  addHoldingsPage(doc, printedTaxReport);
 
   doc.save('table.pdf');
 }
 
-function addIncomePage(doc: jsPDF, report: TaxReport) {
+function addIncomePage(doc: jsPDF, taxReport: PrintedTaxReport) {
   const incomeLines: RowInput[] = [];
   let incomeTotal = 0;
-  report.taxableIncome = report.taxableIncome.sort((l, u) => {
+  let taxableIncome: TaxableTransaction[] = taxReport.income;
+
+  taxableIncome = taxableIncome.sort((l, u) => {
     return l.date > u.date ? 1 : -1;
   });
-  for (const i of report.taxableIncome) {
+  for (const i of taxableIncome) {
     incomeTotal += i.amount * i.price;
     incomeLines.push([
       i.accountName,
@@ -34,23 +104,34 @@ function addIncomePage(doc: jsPDF, report: TaxReport) {
       i.assetSymbol,
       getTransactionType(i.type),
       i.amount.toFixed(8),
+      toEuro(i.price),
       toEuro(i.amount * i.price),
     ]);
   }
   incomeLines.push();
 
   autoTable(doc, {
-    head: [['Account', 'Date', 'Asset', 'Type', 'Amount', 'Total value']],
+    head: [
+      [
+        'Account',
+        'Date',
+        'Asset',
+        'Type',
+        'Amount',
+        'Price per unit',
+        'Total value',
+      ],
+    ],
     body: incomeLines,
-    foot: [['Total', '', '', '', '', toEuro(incomeTotal)]],
+    foot: [['Total', '', '', '', '', '', toEuro(incomeTotal)]],
     showFoot: 'lastPage',
   });
 }
 
-function addHoldingsPage(doc: jsPDF, report: TaxReport) {
+function addHoldingsPage(doc: jsPDF, report: PrintedTaxReport) {
   let holdingsLine: RowInput[] = [];
-  for (const a of report.accounts) {
-    const balances = getBalance(a.transactions)
+  for (const h of report.holdingsAfter) {
+    const balances = h.holdings
       .map((b) => {
         b.price = getAssetLatestPrice(b.symbol, report.assets);
         return b;
@@ -78,7 +159,7 @@ function addHoldingsPage(doc: jsPDF, report: TaxReport) {
     }
 
     doc.addPage();
-    doc.text(a.name, 14, 20);
+    doc.text(h.account.name, 14, 20);
     autoTable(doc, {
       startY: 25,
       head: [['Symbol', 'Amount', 'Price per unit', 'Total']],

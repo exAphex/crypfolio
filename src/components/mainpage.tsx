@@ -92,7 +92,7 @@ export class MainPage extends Component<{}, MainPageState> {
                         />
                       </svg>
 
-                      <span className="mx-4 font-medium">Cryptos</span>
+                      <span className="mx-4 font-medium">Accounts</span>
                     </Link>
                   </li>
                   <li>

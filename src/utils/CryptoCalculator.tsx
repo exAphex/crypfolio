@@ -6,41 +6,42 @@ import {TransactionType} from '../components/models/transaction';
 export function getBalance(transactions: CryptoTransaction[]): CryptoHolding[] {
   let retHoldings: CryptoHolding[] = [];
   for (const t of transactions) {
-    switch (t.type) {
-      case TransactionType.DEPOSIT: {
-        retHoldings = addHolding(retHoldings, t);
-        break;
-      }
-      case TransactionType.WITHDRAW: {
-        retHoldings = addHolding(retHoldings, t);
-        break;
-      }
-      case TransactionType.SELL: {
-        retHoldings = addHolding(retHoldings, t);
-        break;
-      }
-      case TransactionType.BUY: {
-        retHoldings = addHolding(retHoldings, t);
-        break;
-      }
-      case TransactionType.FEE: {
-        retHoldings = addHolding(retHoldings, t);
-        break;
-      }
-      case TransactionType.DISTRIBUTION: {
-        retHoldings = addHolding(retHoldings, t);
-        break;
-      }
-      case TransactionType.STAKING_REWARD: {
-        retHoldings = addHolding(retHoldings, t);
-        break;
-      }
-    }
+    retHoldings = processTransactionToHolding(t, retHoldings);
   }
   return retHoldings;
 }
 
-function addHolding(
+export function processTransactionToHolding(
+  transaction: CryptoTransaction,
+  holdings: CryptoHolding[],
+): CryptoHolding[] {
+  switch (transaction.type) {
+    case TransactionType.DEPOSIT: {
+      return addHolding(holdings, transaction);
+    }
+    case TransactionType.WITHDRAW: {
+      return addHolding(holdings, transaction);
+    }
+    case TransactionType.SELL: {
+      return addHolding(holdings, transaction);
+    }
+    case TransactionType.BUY: {
+      return addHolding(holdings, transaction);
+    }
+    case TransactionType.FEE: {
+      return addHolding(holdings, transaction);
+    }
+    case TransactionType.DISTRIBUTION: {
+      return addHolding(holdings, transaction);
+    }
+    case TransactionType.STAKING_REWARD: {
+      return addHolding(holdings, transaction);
+    }
+  }
+  return [];
+}
+
+export function addHolding(
   holdings: CryptoHolding[],
   transaction: CryptoTransaction,
 ): CryptoHolding[] {
