@@ -13,6 +13,7 @@ export class TaxableSale {
   constructor(
     saleTransaction: TaxableTransaction,
     buyTransaction: TaxableTransaction,
+    amount: number,
   ) {
     this.saleAccountName = saleTransaction.accountName;
     this.saleDate = saleTransaction.date;
@@ -23,6 +24,6 @@ export class TaxableSale {
     this.buyPrice = buyTransaction.price;
 
     this.symbol = saleTransaction.assetSymbol;
-    this.amount = saleTransaction.amount;
+    this.amount = amount;
   }
 }

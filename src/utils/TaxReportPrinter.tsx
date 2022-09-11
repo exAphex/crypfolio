@@ -106,9 +106,9 @@ class PrintedTaxReport {
     for (const t of transactions) {
       if (t.type === TransactionType.SELL) {
         const profit = this.calculateFifoProfit(t, fifoStreamTransactions);
-        if (profit !== 0) {
-          this.sales.push(new TaxableSale(t, profit));
-        }
+        //if (profit !== 0) {
+        //this.sales.push(new TaxableSale(t, profit));
+        //}
       }
     }
   }
@@ -136,12 +136,14 @@ class PrintedTaxReport {
         const timeDiffYears = moment(sale.date).diff(t.date, 'years', true);
         if (fifoAmount >= t.amount) {
           if (timeDiffYears < 1) {
+            this.sales.push(new TaxableSale(sale, t, t.amount));
             profit += t.amount * sale.price - t.amount * t.price;
           }
           fifoAmount -= t.amount;
           t.amount = 0;
         } else {
           if (timeDiffYears < 1) {
+            this.sales.push(new TaxableSale(sale, t, fifoAmount));
             profit += fifoAmount * sale.price - fifoAmount * t.price;
           }
           t.amount -= fifoAmount;
@@ -223,27 +225,48 @@ function addSalePage(doc: jsPDF, taxReport: PrintedTaxReport) {
   let sales: TaxableSale[] = taxReport.sales;
 
   sales = sales.sort((l, u) => {
-    return l.date > u.date ? 1 : -1;
+    return l.saleDate === u.saleDate
+      ? l.buyDate > u.buyDate
+        ? 1
+        : -1
+      : l.saleDate > u.saleDate
+      ? 1
+      : -1;
   });
   for (const i of sales) {
-    incomeTotal += i.profit;
+    const profit = i.amount * i.salePrice - i.buyPrice * i.amount;
+    incomeTotal += profit;
 
     incomeLines.push([
-      i.accountName,
-      getFormattedDate(i.date),
-      i.symbol,
       i.amount.toFixed(8),
-      toEuro(i.salePrice - i.profit),
-      toEuro(i.salePrice),
-      toEuro(i.profit),
+      i.symbol,
+      i.saleAccountName,
+      i.buyAccountName,
+      getFormattedDate(i.buyDate),
+      getFormattedDate(i.saleDate),
+      toEuro(i.buyPrice * i.amount),
+      toEuro(i.salePrice * i.amount),
+      toEuro(profit),
     ]);
   }
   incomeLines.push();
 
   autoTable(doc, {
-    head: [['Account', 'Date', 'Asset', 'Amount', 'Cost', 'Sale', 'Profit']],
+    head: [
+      [
+        'Amount',
+        'Asset',
+        'BuyInAccount',
+        'SaleAccount',
+        'Buy date',
+        'Sale date',
+        'Cost',
+        'Sale',
+        'Profit',
+      ],
+    ],
     body: incomeLines,
-    foot: [['Total', '', '', '', '', '', toEuro(incomeTotal)]],
+    foot: [['Total', '', '', '', '', '', '', '', toEuro(incomeTotal)]],
     showFoot: 'lastPage',
   });
 }
