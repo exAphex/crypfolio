@@ -9,19 +9,27 @@ export class TaxableSale {
   salePrice: number;
   amount: number;
   symbol: string;
+  noBuy: boolean = true;
 
   constructor(
     saleTransaction: TaxableTransaction,
-    buyTransaction: TaxableTransaction,
     amount: number,
+    buyTransaction?: TaxableTransaction,
   ) {
     this.saleAccountName = saleTransaction.accountName;
     this.saleDate = saleTransaction.date;
     this.salePrice = saleTransaction.price;
 
-    this.buyAccountName = buyTransaction.accountName;
-    this.buyDate = buyTransaction.date;
-    this.buyPrice = buyTransaction.price;
+    if (buyTransaction) {
+      this.noBuy = false;
+      this.buyAccountName = buyTransaction.accountName;
+      this.buyDate = buyTransaction.date;
+      this.buyPrice = buyTransaction.price;
+    } else {
+      this.buyAccountName = '';
+      this.buyDate = new Date();
+      this.buyPrice = 0;
+    }
 
     this.symbol = saleTransaction.assetSymbol;
     this.amount = amount;

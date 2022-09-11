@@ -20,6 +20,7 @@ import {TaxReportError} from '../components/models/TaxReportError';
 import {TaxableHolding} from '../components/models/taxreport/TaxableHolding';
 import moment from 'moment';
 import {TaxableSale} from '../components/models/taxreport/TaxableSale';
+import {CryptoTransaction} from '../components/models/cryptotransaction';
 
 class PrintedTaxReport {
   income: TaxableTransaction[] = [];
@@ -106,9 +107,6 @@ class PrintedTaxReport {
     for (const t of transactions) {
       if (t.type === TransactionType.SELL) {
         const profit = this.calculateFifoProfit(t, fifoStreamTransactions);
-        //if (profit !== 0) {
-        //this.sales.push(new TaxableSale(t, profit));
-        //}
       }
     }
   }
@@ -136,14 +134,14 @@ class PrintedTaxReport {
         const timeDiffYears = moment(sale.date).diff(t.date, 'years', true);
         if (fifoAmount >= t.amount) {
           if (timeDiffYears < 1) {
-            this.sales.push(new TaxableSale(sale, t, t.amount));
+            this.sales.push(new TaxableSale(sale, t.amount, t));
             profit += t.amount * sale.price - t.amount * t.price;
           }
           fifoAmount -= t.amount;
           t.amount = 0;
         } else {
           if (timeDiffYears < 1) {
-            this.sales.push(new TaxableSale(sale, t, fifoAmount));
+            this.sales.push(new TaxableSale(sale, fifoAmount, t));
             profit += fifoAmount * sale.price - fifoAmount * t.price;
           }
           t.amount -= fifoAmount;
@@ -151,6 +149,9 @@ class PrintedTaxReport {
           break;
         }
       }
+    }
+    if (fifoAmount > 0) {
+      this.sales.push(new TaxableSale(sale, fifoAmount));
     }
     return profit;
   }
@@ -170,8 +171,6 @@ export function printTaxReport(report: TaxReport) {
   doc.text('Crypfolio Tax Report', 50, 140);
   doc.setFontSize(14);
   doc.text('Report for year: ' + report.taxYear, 75, 150);
-  doc.addPage(undefined, 'landscape');
-
   addSalePage(doc, printedTaxReport);
   addIncomePage(doc, printedTaxReport);
   addHoldingsPage(doc, printedTaxReport);
@@ -200,8 +199,12 @@ function addIncomePage(doc: jsPDF, taxReport: PrintedTaxReport) {
     ]);
   }
   incomeLines.push();
+  doc.addPage();
+  doc.setFontSize(22);
+  doc.text('Income from staking/distributions', 14, 20);
 
   autoTable(doc, {
+    startY: 25,
     head: [
       [
         'Account',
@@ -236,22 +239,39 @@ function addSalePage(doc: jsPDF, taxReport: PrintedTaxReport) {
   for (const i of sales) {
     const profit = i.amount * i.salePrice - i.buyPrice * i.amount;
     incomeTotal += profit;
-
-    incomeLines.push([
-      i.amount.toFixed(8),
-      i.symbol,
-      i.saleAccountName,
-      i.buyAccountName,
-      getFormattedDate(i.buyDate),
-      getFormattedDate(i.saleDate),
-      toEuro(i.buyPrice * i.amount),
-      toEuro(i.salePrice * i.amount),
-      toEuro(profit),
-    ]);
+    if (i.noBuy) {
+      incomeLines.push([
+        i.amount.toFixed(8),
+        i.symbol,
+        '',
+        i.saleAccountName,
+        '',
+        getFormattedDate(i.saleDate),
+        toEuro(0),
+        toEuro(i.salePrice * i.amount),
+        toEuro(profit),
+      ]);
+    } else {
+      incomeLines.push([
+        i.amount.toFixed(8),
+        i.symbol,
+        i.buyAccountName,
+        i.saleAccountName,
+        getFormattedDate(i.buyDate),
+        getFormattedDate(i.saleDate),
+        toEuro(i.buyPrice * i.amount),
+        toEuro(i.salePrice * i.amount),
+        toEuro(profit),
+      ]);
+    }
   }
   incomeLines.push();
 
+  doc.addPage(undefined, 'landscape');
+  doc.setFontSize(22);
+  doc.text('Income from sales', 14, 20);
   autoTable(doc, {
+    startY: 25,
     head: [
       [
         'Amount',
@@ -273,7 +293,13 @@ function addSalePage(doc: jsPDF, taxReport: PrintedTaxReport) {
 
 function addHoldingsPage(doc: jsPDF, report: PrintedTaxReport) {
   let holdingsLine: RowInput[] = [];
+  doc.addPage();
+  doc.setFontSize(22);
+  doc.text('Final holdings', 14, 20);
+  let lastY = 30;
   for (const h of report.holdingsAfter) {
+    doc.setFontSize(14);
+    doc.text(h.account.name, 14, lastY);
     const balances = h.holdings
       .map((b) => {
         b.price = getAssetLatestPrice(b.symbol, report.assets);
@@ -301,14 +327,13 @@ function addHoldingsPage(doc: jsPDF, report: PrintedTaxReport) {
       ]);
     }
 
-    doc.addPage();
-    doc.text(h.account.name, 14, 20);
     autoTable(doc, {
-      startY: 25,
+      startY: lastY + 5,
       head: [['Symbol', 'Amount', 'Price per unit', 'Total']],
       body: holdingsLine,
       foot: [['Total', '', '', toEuro(total)]],
       showFoot: 'lastPage',
     });
+    lastY = (doc as any).lastAutoTable.finalY + 20;
   }
 }
