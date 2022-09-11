@@ -20,7 +20,6 @@ import {TaxReportError} from '../components/models/TaxReportError';
 import {TaxableHolding} from '../components/models/taxreport/TaxableHolding';
 import moment from 'moment';
 import {TaxableSale} from '../components/models/taxreport/TaxableSale';
-import {CryptoTransaction} from '../components/models/cryptotransaction';
 
 class PrintedTaxReport {
   income: TaxableTransaction[] = [];
@@ -168,14 +167,121 @@ export function printTaxReport(report: TaxReport) {
   const doc = new jsPDF();
   const printedTaxReport = new PrintedTaxReport(report);
   doc.setFontSize(32);
-  doc.text('Crypfolio Tax Report', 50, 140);
+  doc.text('Crypfolio Steuerbericht', 50, 140);
   doc.setFontSize(14);
-  doc.text('Report for year: ' + report.taxYear, 75, 150);
+  doc.text('Steuerjahr: ' + report.taxYear, 85, 150);
+  addSummaryPage(doc, printedTaxReport);
   addSalePage(doc, printedTaxReport);
   addIncomePage(doc, printedTaxReport);
   addHoldingsPage(doc, printedTaxReport);
-
+  addFooters(doc);
   doc.save('table.pdf');
+}
+function addFooters(doc: jsPDF) {
+  const pageCount = doc.internal.pages.length - 1;
+
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  for (let i = 2; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.text(
+      'Seite ' + String(i) + '/' + String(pageCount),
+      doc.internal.pageSize.width / 2,
+      doc.internal.pageSize.height - 10,
+      {
+        align: 'center',
+      },
+    );
+  }
+}
+
+function addSummaryPage(doc: jsPDF, taxReport: PrintedTaxReport) {
+  const salesIncomeLines: RowInput[] = [];
+  const incomeLines: RowInput[] = [];
+  let salesCost: number = 0;
+  let salesProfit: number = 0;
+  let salesPrice: number = 0;
+  let stakingIncome: number = 0;
+  let distributionIncome: number = 0;
+  let lastY = 0;
+
+  for (const s of taxReport.sales) {
+    salesPrice += s.salePrice * s.amount;
+    if (!s.noBuy) {
+      salesCost += s.buyPrice * s.amount;
+    }
+    salesProfit += s.amount * s.salePrice - s.buyPrice * s.amount;
+  }
+
+  for (const i of taxReport.income) {
+    if (i.type === TransactionType.STAKING_REWARD) {
+      stakingIncome += i.amount * i.price;
+    } else if (i.type === TransactionType.DISTRIBUTION) {
+      distributionIncome += i.amount * i.price;
+    }
+  }
+
+  salesIncomeLines.push(['Veräußerungspreis:', toEuro(salesPrice)]);
+  salesIncomeLines.push(['Anschaffungskosten:', toEuro(salesCost * -1)]);
+
+  incomeLines.push(['Summe Staking:', toEuro(stakingIncome)]);
+  incomeLines.push(['Summe Belohnungen/Bonus:', toEuro(distributionIncome)]);
+
+  doc.addPage();
+  doc.setFontSize(22);
+  doc.text('Zusammenfassung', 14, 20);
+  doc.setFontSize(14);
+  doc.text(
+    'Sonstige Einkünfte aus privaten Veräußerungsgeschäften nach § 23 EStG',
+    14,
+    30,
+  );
+  doc.setFontSize(14);
+  autoTable(doc, {
+    columnStyles: {
+      1: {
+        halign: 'right',
+      },
+    },
+    didParseCell: (data) => {
+      data.table.foot.forEach((footRow) => {
+        footRow.cells[1].styles.halign = 'right';
+      });
+    },
+    startY: 35,
+    body: salesIncomeLines,
+    foot: [
+      [
+        'Veräußerungsgewinn /-verlust innerhalb der 1-jährigen Haltefrist:',
+        toEuro(salesProfit),
+      ],
+    ],
+    showFoot: 'lastPage',
+  });
+  lastY = (doc as any).lastAutoTable.finalY + 20;
+  doc.text('Sonstige Einkünfte nach § 22 Nr. 3 EStG', 14, lastY);
+  doc.setFontSize(14);
+  autoTable(doc, {
+    startY: lastY + 5,
+    body: salesIncomeLines,
+    columnStyles: {
+      1: {
+        halign: 'right',
+      },
+    },
+    didParseCell: (data) => {
+      data.table.foot.forEach((footRow) => {
+        footRow.cells[1].styles.halign = 'right';
+      });
+    },
+    foot: [
+      [
+        'Summe sonstiger Einkünfte:',
+        toEuro(distributionIncome + stakingIncome),
+      ],
+    ],
+    showFoot: 'lastPage',
+  });
 }
 
 function addIncomePage(doc: jsPDF, taxReport: PrintedTaxReport) {
@@ -201,23 +307,31 @@ function addIncomePage(doc: jsPDF, taxReport: PrintedTaxReport) {
   incomeLines.push();
   doc.addPage();
   doc.setFontSize(22);
-  doc.text('Income from staking/distributions', 14, 20);
+  doc.text('Auszug - sonstige Einkünfte', 14, 20);
 
   autoTable(doc, {
     startY: 25,
     head: [
-      [
-        'Account',
-        'Date',
-        'Asset',
-        'Type',
-        'Amount',
-        'Price per unit',
-        'Total value',
-      ],
+      ['Konto', 'Datum', 'Asset', 'Typ', 'Anzahl', 'Preis pro Einheit', 'Wert'],
     ],
     body: incomeLines,
-    foot: [['Total', '', '', '', '', '', toEuro(incomeTotal)]],
+    columnStyles: {
+      4: {
+        halign: 'right',
+      },
+      5: {
+        halign: 'right',
+      },
+      6: {
+        halign: 'right',
+      },
+    },
+    didParseCell: (data) => {
+      data.table.foot.forEach((footRow) => {
+        footRow.cells[6].styles.halign = 'right';
+      });
+    },
+    foot: [['Summe', '', '', '', '', '', toEuro(incomeTotal)]],
     showFoot: 'lastPage',
   });
 }
@@ -269,24 +383,43 @@ function addSalePage(doc: jsPDF, taxReport: PrintedTaxReport) {
 
   doc.addPage(undefined, 'landscape');
   doc.setFontSize(22);
-  doc.text('Income from sales', 14, 20);
+  doc.text('Auszug - Einkünfte aus privaten Veräußerungsgeschäften', 14, 20);
   autoTable(doc, {
     startY: 25,
     head: [
       [
-        'Amount',
+        'Anzahl',
         'Asset',
-        'BuyInAccount',
-        'SaleAccount',
-        'Buy date',
-        'Sale date',
-        'Cost',
-        'Sale',
+        'Kauf bei',
+        'Verkauf bei',
+        'Einkaufsdatum',
+        'Verkaufsdatum',
+        'Kosten',
+        'Verkaufspreis',
         'Profit',
       ],
     ],
+    columnStyles: {
+      0: {
+        halign: 'right',
+      },
+      6: {
+        halign: 'right',
+      },
+      7: {
+        halign: 'right',
+      },
+      8: {
+        halign: 'right',
+      },
+    },
+    didParseCell: (data) => {
+      data.table.foot.forEach((footRow) => {
+        footRow.cells[8].styles.halign = 'right';
+      });
+    },
     body: incomeLines,
-    foot: [['Total', '', '', '', '', '', '', '', toEuro(incomeTotal)]],
+    foot: [['Summe', '', '', '', '', '', '', '', toEuro(incomeTotal)]],
     showFoot: 'lastPage',
   });
 }
@@ -295,7 +428,7 @@ function addHoldingsPage(doc: jsPDF, report: PrintedTaxReport) {
   let holdingsLine: RowInput[] = [];
   doc.addPage();
   doc.setFontSize(22);
-  doc.text('Final holdings', 14, 20);
+  doc.text('Bestand', 14, 20);
   let lastY = 30;
   for (const h of report.holdingsAfter) {
     doc.setFontSize(14);
@@ -329,9 +462,25 @@ function addHoldingsPage(doc: jsPDF, report: PrintedTaxReport) {
 
     autoTable(doc, {
       startY: lastY + 5,
-      head: [['Symbol', 'Amount', 'Price per unit', 'Total']],
+      columnStyles: {
+        1: {
+          halign: 'right',
+        },
+        2: {
+          halign: 'right',
+        },
+        3: {
+          halign: 'right',
+        },
+      },
+      didParseCell: (data) => {
+        data.table.foot.forEach((footRow) => {
+          footRow.cells[3].styles.halign = 'right';
+        });
+      },
+      head: [['Asset', 'Anzahl', 'Preis pro Einheit', 'Wert']],
       body: holdingsLine,
-      foot: [['Total', '', '', toEuro(total)]],
+      foot: [['Summe', '', '', toEuro(total)]],
       showFoot: 'lastPage',
     });
     lastY = (doc as any).lastAutoTable.finalY + 20;
