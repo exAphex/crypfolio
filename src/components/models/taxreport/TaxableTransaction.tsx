@@ -2,7 +2,7 @@ import {CryptoAccount} from '../cryptoaccount';
 import {CryptoTransaction} from '../cryptotransaction';
 import {TransactionType} from '../transaction';
 
-export class TaxableIncome {
+export class TaxableTransaction {
   accountName: string;
   type: TransactionType;
   date: Date;

@@ -1,4 +1,4 @@
-import {Asset, AssetPrice} from '../asset';
+import {Asset} from '../asset';
 
 export type AssetPriceDTO = {
   date: number;
