@@ -19,9 +19,11 @@ import {
 import {TaxReportError} from '../components/models/TaxReportError';
 import {TaxableHolding} from '../components/models/taxreport/TaxableHolding';
 import moment from 'moment';
+import {TaxableSale} from '../components/models/taxreport/TaxableSale';
 
 class PrintedTaxReport {
   income: TaxableTransaction[] = [];
+  sales: TaxableSale[] = [];
   holdingsAfter: TaxableHolding[] = [];
   assets: CryptoAsset[] = [];
 
@@ -103,9 +105,10 @@ class PrintedTaxReport {
       });
     for (const t of transactions) {
       if (t.type === TransactionType.SELL) {
-        let profit = this.calculateFifoProfit(t, fifoStreamTransactions);
-        console.log(t);
-        console.log(profit);
+        const profit = this.calculateFifoProfit(t, fifoStreamTransactions);
+        if (profit !== 0) {
+          this.sales.push(new TaxableSale(t, profit));
+        }
       }
     }
   }
@@ -167,6 +170,7 @@ export function printTaxReport(report: TaxReport) {
   doc.text('Report for year: ' + report.taxYear, 75, 150);
   doc.addPage(undefined, 'landscape');
 
+  addSalePage(doc, printedTaxReport);
   addIncomePage(doc, printedTaxReport);
   addHoldingsPage(doc, printedTaxReport);
 
@@ -207,6 +211,37 @@ function addIncomePage(doc: jsPDF, taxReport: PrintedTaxReport) {
         'Total value',
       ],
     ],
+    body: incomeLines,
+    foot: [['Total', '', '', '', '', '', toEuro(incomeTotal)]],
+    showFoot: 'lastPage',
+  });
+}
+
+function addSalePage(doc: jsPDF, taxReport: PrintedTaxReport) {
+  const incomeLines: RowInput[] = [];
+  let incomeTotal = 0;
+  let sales: TaxableSale[] = taxReport.sales;
+
+  sales = sales.sort((l, u) => {
+    return l.date > u.date ? 1 : -1;
+  });
+  for (const i of sales) {
+    incomeTotal += i.profit;
+
+    incomeLines.push([
+      i.accountName,
+      getFormattedDate(i.date),
+      i.symbol,
+      i.amount.toFixed(8),
+      toEuro(i.salePrice - i.profit),
+      toEuro(i.salePrice),
+      toEuro(i.profit),
+    ]);
+  }
+  incomeLines.push();
+
+  autoTable(doc, {
+    head: [['Account', 'Date', 'Asset', 'Amount', 'Cost', 'Sale', 'Profit']],
     body: incomeLines,
     foot: [['Total', '', '', '', '', '', toEuro(incomeTotal)]],
     showFoot: 'lastPage',
