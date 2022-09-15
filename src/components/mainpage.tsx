@@ -6,6 +6,7 @@ import InfoOverview from './pages/info';
 import CryptoAccountDetail from './pages/crypto/CryptoAccountDetail';
 import AssetOverview from './pages/asset/AssetOverview';
 import CryptoAssetDetail from './pages/asset/CryptoAssetDetail';
+import {PerformanceOverview} from './pages/performance/PerformanceOverview';
 
 type MainPageState = {selectedNavItem: string};
 
@@ -63,6 +64,36 @@ export class MainPage extends Component<{}, MainPageState> {
                       </svg>
 
                       <span className="mx-4 font-medium">Dashboard</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={
+                        'flex items-center px-4 py-2 mt-5 text-gray-600 ' +
+                        this.getSelectedBg('PERFORMANCE') +
+                        ' rounded-md hover:bg-gray-200'
+                      }
+                      onClick={() => {
+                        this.setSelected('PERFORMANCE');
+                      }}
+                      to="/performance"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M11 11V9a2 2 0 00-2-2m2 4v4a2 2 0 104 0v-1m-4-3H9m2 0h4m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+
+                      <span className="mx-4 font-medium">Performance</span>
                     </Link>
                   </li>
                   <li>
@@ -201,6 +232,7 @@ export class MainPage extends Component<{}, MainPageState> {
               <Route path="/cryptos" element={<CryptoOverview />} />
               <Route path="/info" element={<InfoOverview />} />
               <Route path="/assets" element={<AssetOverview />} />
+              <Route path="/performance" element={<PerformanceOverview />} />
               <Route
                 path="/cryptodetail/:id"
                 element={<CryptoAccountDetail />}
