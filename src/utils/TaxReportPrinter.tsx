@@ -126,7 +126,6 @@ class PrintedTaxReport {
         sale.assetSymbol === t.assetSymbol &&
         t.amount > 0 &&
         (t.type === TransactionType.BUY ||
-          t.type === TransactionType.DEPOSIT ||
           t.type === TransactionType.DISTRIBUTION ||
           t.type === TransactionType.STAKING_REWARD)
       ) {
@@ -263,7 +262,7 @@ function addSummaryPage(doc: jsPDF, taxReport: PrintedTaxReport) {
   doc.setFontSize(14);
   autoTable(doc, {
     startY: lastY + 5,
-    body: salesIncomeLines,
+    body: incomeLines,
     columnStyles: {
       1: {
         halign: 'right',
